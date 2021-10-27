@@ -3,9 +3,22 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Designation {
-  String text = '';
+  String text = 'tttt';
+
+  Designation({required this.text});
 
   draw(Canvas canvas) {}
+
+  TextPainter drawText() {
+    TextSpan ts = TextSpan(text: text, style: TextStyle(color: Colors.black));
+    TextPainter tp = TextPainter(
+      text: ts,
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout();
+    return tp;
+  }
 
   drawArrow({
     required Canvas canvas,
@@ -56,14 +69,11 @@ class Dimension extends Designation {
   Offset end;
   Offset start;
 
-  @override
-  String text;
-
   Dimension({
-    required this.text,
+    required String text,
     required this.start,
     required this.end,
-  }) : super();
+  }) : super(text: text);
 
   @override
   draw(Canvas canvas) {
@@ -77,18 +87,16 @@ class Note extends Designation {
   Offset pointer;
   Offset note;
 
-  @override
-  String text;
-
   Note({
     required this.pointer,
     required this.note,
-    required this.text,
-  }) : super();
+    required String text,
+  }) : super(text: text);
 
   @override
   draw(Canvas canvas) {
     canvas.drawLine(pointer, note, Paint());
     drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -15);
+    drawText().paint(canvas, note);
   }
 }

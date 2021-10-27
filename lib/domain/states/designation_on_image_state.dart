@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui' as ui show Image;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
@@ -9,6 +12,12 @@ class DesignationOnImageState extends GetxController {
   Offset? p1;
   Offset? p2;
   DesignationMode? mode;
+  ui.Image? image;
+
+  loadImage(File f) async {
+    final data = await f.readAsBytes();
+    image = await decodeImageFromList(data);
+  }
 
   tapHandler(Offset pos) {
     if (mode == DesignationMode.dimension) {
