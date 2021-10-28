@@ -16,7 +16,7 @@ class NotesOnImageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // _state.loadImage(File("/home/lavruh/Screenshot_20200409_212221.jpg"));
+    _state.loadImage(File("/home/lavruh/Screenshot_20200409_212221.jpg"));
     return Scaffold(
       body: GetBuilder<DesignationOnImageState>(builder: (_) {
         return GestureDetector(

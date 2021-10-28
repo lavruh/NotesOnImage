@@ -11,12 +11,18 @@ class DesignationOnImageState extends GetxController {
   final objects = <Designation>[].obs();
   Offset? p1;
   Offset? p2;
+  String text = '';
   DesignationMode? mode;
   ui.Image? image;
 
   loadImage(File f) async {
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
+    update();
+  }
+
+  setText(String val) {
+    text = val;
   }
 
   tapHandler(Offset pos) {
@@ -37,7 +43,7 @@ class DesignationOnImageState extends GetxController {
     }
     if (p1 != null && p2 != null) {
       objects.add(Dimension(
-        text: "text",
+        text: text,
         start: p1!,
         end: p2!,
       ));
@@ -55,7 +61,7 @@ class DesignationOnImageState extends GetxController {
     }
     if (p1 != null && p2 != null) {
       objects.add(Note(
-        text: "text",
+        text: text,
         pointer: p1!,
         note: p2!,
       ));
