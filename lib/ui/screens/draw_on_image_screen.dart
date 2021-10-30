@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
@@ -42,7 +41,7 @@ class MyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (img != null) {
-      canvas.drawImage((img as ui.Image), Offset(0, 0), Paint());
+      canvas.drawImage((img as ui.Image), const Offset(0, 0), Paint());
     }
     for (Designation o in objects) {
       o.draw(canvas);

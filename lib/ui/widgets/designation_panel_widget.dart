@@ -7,13 +7,15 @@ import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
 class DesignationsPanelWidget extends StatelessWidget {
   final _state = Get.find<DesignationOnImageState>();
 
+  DesignationsPanelWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 75,
+      height: 60,
       width: MediaQuery.of(context).size.width,
       child: Card(
-        color: Colors.grey,
+        color: Colors.transparent,
         child: Wrap(
           alignment: WrapAlignment.spaceAround,
           runAlignment: WrapAlignment.center,

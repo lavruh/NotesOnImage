@@ -3,21 +3,40 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class Designation {
-  String text = 'tttt';
+  String text = '';
+  late final Paint paint;
 
-  Designation({required this.text});
+  Designation({required this.text, Paint? lineStyle}) {
+    if (lineStyle != null) {
+      paint = Paint()
+        ..strokeWidth = lineStyle.strokeWidth
+        ..color = lineStyle.color;
+    } else {
+      paint = Paint();
+    }
+  }
 
   draw(Canvas canvas) {}
 
   TextPainter drawText() {
-    TextSpan ts = TextSpan(text: text, style: TextStyle(color: Colors.black));
+    TextSpan ts = TextSpan(
+        text: text,
+        style: TextStyle(
+          color: paint.color,
+          fontSize: paint.strokeWidth + 15,
+        ));
     TextPainter tp = TextPainter(
       text: ts,
-      textAlign: TextAlign.start,
+      textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
     tp.layout();
     return tp;
+  }
+
+  double getDirection(Offset p1, Offset p2) {
+    Offset p = changeOrigin(newOrigin: p2, point: p1);
+    return atan2(p.dy, p.dx);
   }
 
   drawArrow({
@@ -25,20 +44,23 @@ class Designation {
     required Offset p1,
     required Offset p2,
     required int arrowAng,
+    required double fi,
   }) {
-    Offset p = changeOrigin(newOrigin: p2, point: p1);
-    double fi = atan2(p.dy, p.dx);
     canvas.drawLine(
       p1,
       rotatePoint(
-          origin: p1, point: Offset(p1.dx + arrowAng, p1.dy - 5), a: fi),
-      Paint(),
+          origin: p1,
+          point: Offset(p1.dx + arrowAng, p1.dy - arrowAng / 3),
+          a: fi),
+      paint,
     );
     canvas.drawLine(
       p1,
       rotatePoint(
-          origin: p1, point: Offset(p1.dx + arrowAng, p1.dy + 5), a: fi),
-      Paint(),
+          origin: p1,
+          point: Offset(p1.dx + arrowAng, p1.dy + arrowAng / 3),
+          a: fi),
+      paint,
     );
   }
 
@@ -63,6 +85,14 @@ class Designation {
           (point.dy - origin.dy) * cos(a),
     );
   }
+
+  double vectorLen({required Offset p1, required Offset p2}) {
+    return sqrt(pow(p1.dx - p2.dx, 2) + pow(p1.dy - p2.dy, 2));
+  }
+
+  Offset midPoint({required Offset p1, required Offset p2}) {
+    return Offset(p1.dx - p2.dx, p1.dy - p2.dy);
+  }
 }
 
 class Dimension extends Designation {
@@ -73,13 +103,26 @@ class Dimension extends Designation {
     required String text,
     required this.start,
     required this.end,
-  }) : super(text: text);
+    Paint? lineStyle,
+  }) : super(text: text, lineStyle: lineStyle);
 
   @override
   draw(Canvas canvas) {
-    canvas.drawLine(start, end, Paint());
-    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -15);
-    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: -15);
+    canvas.drawLine(start, end, paint);
+    double fi = getDirection(start, end);
+    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -25, fi: fi);
+    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 25, fi: fi);
+    canvas.save();
+    canvas.translate(start.dx, start.dy);
+    canvas.rotate(fi + pi);
+    TextPainter tp = drawText();
+    tp.paint(
+        canvas,
+        Offset(
+          vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
+          -30,
+        ));
+    canvas.restore();
   }
 }
 
@@ -91,12 +134,17 @@ class Note extends Designation {
     required this.pointer,
     required this.note,
     required String text,
-  }) : super(text: text);
+    Paint? lineStyle,
+  }) : super(
+          text: text,
+          lineStyle: lineStyle,
+        );
 
   @override
   draw(Canvas canvas) {
-    canvas.drawLine(pointer, note, Paint());
-    drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -15);
+    double fi = getDirection(pointer, note);
+    canvas.drawLine(pointer, note, paint);
+    drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -25, fi: fi);
     drawText().paint(canvas, note);
   }
 }

@@ -14,6 +14,9 @@ class DesignationOnImageState extends GetxController {
   String text = '';
   DesignationMode? mode;
   ui.Image? image;
+  Paint lineStyle = Paint()
+    ..color = Colors.redAccent
+    ..strokeWidth = 3.0;
 
   loadImage(File f) async {
     final data = await f.readAsBytes();
@@ -23,6 +26,16 @@ class DesignationOnImageState extends GetxController {
 
   setText(String val) {
     text = val;
+  }
+
+  setLineWeight(double val) {
+    lineStyle.strokeWidth = val;
+  }
+
+  Color get lineColor => lineStyle.color;
+
+  setLineColor(Color val) {
+    lineStyle.color = val;
   }
 
   tapHandler(Offset pos) {
@@ -46,6 +59,7 @@ class DesignationOnImageState extends GetxController {
         text: text,
         start: p1!,
         end: p2!,
+        lineStyle: lineStyle,
       ));
       p1 = null;
       p2 = null;
@@ -64,6 +78,7 @@ class DesignationOnImageState extends GetxController {
         text: text,
         pointer: p1!,
         note: p2!,
+        lineStyle: lineStyle,
       ));
       p1 = null;
       p2 = null;
