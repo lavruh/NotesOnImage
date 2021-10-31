@@ -1,9 +1,11 @@
 import 'dart:io';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui;
+import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
+import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 
 enum DesignationMode { dimension, note }
 
@@ -17,11 +19,38 @@ class DesignationOnImageState extends GetxController {
   Paint lineStyle = Paint()
     ..color = Colors.redAccent
     ..strokeWidth = 3.0;
+  late Size image_size;
+  String path = '';
 
   loadImage(File f) async {
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
+    path = f.path;
     update();
+  }
+
+  undo() {
+    objects.removeLast();
+    update();
+  }
+
+  saveImage() async {
+    if (image != null) {
+      final rec = ui.PictureRecorder();
+      final canvas = Canvas(rec);
+      final painter = ImagePainter();
+      painter.paint(canvas, image_size);
+      final picture = rec.endRecording();
+      final im = await picture.toImage(image!.width, image!.height);
+      final outFile = File("${path}_${generateFileName()}");
+      final byteData = await im.toByteData(format: ui.ImageByteFormat.png);
+      outFile.writeAsBytes(byteData!.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    }
+  }
+
+  String generateFileName() {
+    return "${DateFormat("ms").format(DateTime.now())}.jpg";
   }
 
   setText(String val) {

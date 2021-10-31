@@ -70,9 +70,12 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                 "Line Color:",
                 style: Theme.of(context).textTheme.headline5,
               ),
-              MaterialPicker(
-                pickerColor: _state.lineColor,
-                onColorChanged: _state.setLineColor,
+              SizedBox(
+                height: 200,
+                child: MaterialPicker(
+                  pickerColor: _state.lineColor,
+                  onColorChanged: _state.setLineColor,
+                ),
               ),
             ],
           ),

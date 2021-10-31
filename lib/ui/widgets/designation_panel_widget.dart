@@ -20,7 +20,16 @@ class DesignationsPanelWidget extends StatelessWidget {
           alignment: WrapAlignment.spaceAround,
           runAlignment: WrapAlignment.center,
           children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.save)),
+            IconButton(
+                onPressed: () {
+                  _state.saveImage();
+                },
+                icon: const Icon(Icons.save)),
+            IconButton(
+                onPressed: () {
+                  _state.undo();
+                },
+                icon: const Icon(Icons.undo)),
             IconButton(
                 onPressed: () {
                   showDialog(
