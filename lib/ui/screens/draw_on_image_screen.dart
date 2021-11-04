@@ -15,20 +15,32 @@ class NotesOnImageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _state.loadImage(File("/home/lavruh/Screenshot_20200409_212221.jpg"));
     return Scaffold(
       body: GetBuilder<DesignationOnImageState>(builder: (_) {
-        return GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            _state.tapHandler(details.globalPosition);
-          },
-          child: CustomPaint(
-            painter: ImagePainter(),
-            child: Container(),
+        return Stack(alignment: AlignmentDirectional.bottomCenter, children: [
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: FittedBox(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTapDown: (TapDownDetails details) {
+                  _state.tapHandler(details.localPosition);
+                },
+                child: SizedBox(
+                  width: _.image!.width.toDouble(),
+                  height: _.image!.height.toDouble(),
+                  child: CustomPaint(
+                    painter: ImagePainter(),
+                    child: Container(),
+                  ),
+                ),
+              ),
+            ),
           ),
-        );
+          DesignationsPanelWidget(),
+        ]);
       }),
-      bottomNavigationBar: DesignationsPanelWidget(),
     );
   }
 }

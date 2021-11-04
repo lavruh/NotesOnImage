@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
@@ -13,6 +15,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _state = Get.find<DesignationOnImageState>();
+     _state.loadImage(File("/storage/emulated/0/DCIM/Queen/_2021112j5553.jpg"));
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

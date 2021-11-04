@@ -23,7 +23,7 @@ class Designation {
         text: text,
         style: TextStyle(
           color: paint.color,
-          fontSize: paint.strokeWidth + 15,
+          fontSize: paint.strokeWidth + 40,
         ));
     TextPainter tp = TextPainter(
       text: ts,
@@ -120,7 +120,7 @@ class Dimension extends Designation {
         canvas,
         Offset(
           vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
-          -30,
+          -60,
         ));
     canvas.restore();
   }
@@ -145,6 +145,16 @@ class Note extends Designation {
     double fi = getDirection(pointer, note);
     canvas.drawLine(pointer, note, paint);
     drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -25, fi: fi);
-    drawText().paint(canvas, note);
+
+    Offset textOffset = Offset(note.dx + 30, note.dy + 30);
+    drawText().paint(
+        canvas,
+        rotatePoint(
+          origin: note,
+          point: (fi >= 0) & (fi < pi / 2)
+              ? Offset(note.dx, note.dy + 30)
+              : Offset(note.dx, note.dy),
+          a: fi + pi,
+        ));
   }
 }

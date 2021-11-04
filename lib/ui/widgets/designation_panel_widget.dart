@@ -15,7 +15,7 @@ class DesignationsPanelWidget extends StatelessWidget {
       height: 60,
       width: MediaQuery.of(context).size.width,
       child: Card(
-        color: Colors.transparent,
+        color: Colors.grey,
         child: Wrap(
           alignment: WrapAlignment.spaceAround,
           runAlignment: WrapAlignment.center,
@@ -44,12 +44,7 @@ class DesignationsPanelWidget extends StatelessWidget {
                   _state.mode = DesignationMode.dimension;
                 },
                 icon: const Icon(Icons.open_in_full)),
-            IconButton(
-                onPressed: () {
-                  showDialog(
-                      context: context, builder: (_) => TextStyleDialog());
-                },
-                icon: const Icon(Icons.rtt)),
+            
           ],
         ),
       ),

@@ -26,6 +26,7 @@ class DesignationOnImageState extends GetxController {
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
     path = f.path;
+    image_size = Size(image!.width.toDouble(), image!.height.toDouble());
     update();
   }
 
@@ -46,6 +47,8 @@ class DesignationOnImageState extends GetxController {
       final byteData = await im.toByteData(format: ui.ImageByteFormat.png);
       outFile.writeAsBytes(byteData!.buffer
           .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      Get.snackbar("Saved at:", outFile.path, colorText: Colors.green);
+      update();
     }
   }
 
@@ -113,5 +116,11 @@ class DesignationOnImageState extends GetxController {
       p2 = null;
       mode = null;
     }
+  }
+
+  @override
+  void onInit() {
+    objects.clear();
+    super.onInit();
   }
 }
