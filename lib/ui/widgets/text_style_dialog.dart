@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 
+// TODO load pre size settings
 class TextStyleDialog extends StatefulWidget {
   const TextStyleDialog({Key? key}) : super(key: key);
 
@@ -12,7 +13,6 @@ class TextStyleDialog extends StatefulWidget {
 
 class _TextStyleDialogState extends State<TextStyleDialog> {
   TextEditingController txtController = TextEditingController();
-  int lineSize = 3;
   List<DropdownMenuItem<int>> availableSizes = List.generate(
       10,
       (index) => DropdownMenuItem(
@@ -57,11 +57,11 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                 padding: const EdgeInsets.all(8.0),
                 child: DropdownButton(
                   items: availableSizes,
-                  value: lineSize,
-                  onChanged: (int? val) {
+                  value: _state.lineWeight,
+                  onChanged: (num? val) {
                     setState(() {
-                      lineSize = val ?? 3;
-                      _state.setLineWeight(lineSize.toDouble());
+                      final size = val?.toDouble() ?? 7;
+                      _state.setLineWeight(size);
                     });
                   },
                 ),

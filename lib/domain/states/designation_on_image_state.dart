@@ -60,6 +60,8 @@ class DesignationOnImageState extends GetxController {
     text = val;
   }
 
+  double get lineWeight => lineStyle.strokeWidth;
+
   setLineWeight(double val) {
     lineStyle.strokeWidth = val;
   }

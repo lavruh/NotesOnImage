@@ -8,10 +8,22 @@ import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
 
-class NotesOnImageScreen extends StatelessWidget {
+// TODO  clean state on init
+class NotesOnImageScreen extends StatefulWidget {
   NotesOnImageScreen({Key? key}) : super(key: key);
 
+  @override
+  State<NotesOnImageScreen> createState() => _NotesOnImageScreenState();
+}
+
+class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
   final _state = Get.find<DesignationOnImageState>();
+
+  @override
+  void initState() {
+    _state.onInit();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
