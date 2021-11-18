@@ -110,8 +110,8 @@ class Dimension extends Designation {
   draw(Canvas canvas) {
     canvas.drawLine(start, end, paint);
     double fi = getDirection(start, end);
-    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -25, fi: fi);
-    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 25, fi: fi);
+    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
+    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 45, fi: fi);
     canvas.save();
     canvas.translate(start.dx, start.dy);
     canvas.rotate(fi + pi);
@@ -144,7 +144,7 @@ class Note extends Designation {
   draw(Canvas canvas) {
     double fi = getDirection(pointer, note);
     canvas.drawLine(pointer, note, paint);
-    drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -25, fi: fi);
+    drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -45, fi: fi);
 
     Offset textOffset = Offset(note.dx + 30, note.dy + 30);
     drawText().paint(

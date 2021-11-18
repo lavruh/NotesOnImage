@@ -18,7 +18,7 @@ class DesignationOnImageState extends GetxController {
   ui.Image? image;
   Paint lineStyle = Paint()
     ..color = Colors.redAccent
-    ..strokeWidth = 3.0;
+    ..strokeWidth = 8.0;
   late Size image_size;
   String path = '';
 

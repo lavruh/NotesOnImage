@@ -16,8 +16,8 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
   List<DropdownMenuItem<int>> availableSizes = List.generate(
       10,
       (index) => DropdownMenuItem(
-            child: Text((index + 1).toString()),
-            value: index + 1,
+            child: Text(((index + 1) * 2).toString()),
+            value: (index + 1) * 2,
           ));
 
   final _state = Get.find<DesignationOnImageState>();
