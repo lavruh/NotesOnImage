@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
-
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as Im;
 import 'package:get/get.dart';
+
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 
@@ -44,9 +45,13 @@ class DesignationOnImageState extends GetxController {
       final picture = rec.endRecording();
       final im = await picture.toImage(image!.width, image!.height);
       final outFile = File("${path}_${generateFileName()}");
-      final byteData = await im.toByteData(format: ui.ImageByteFormat.png);
-      outFile.writeAsBytes(byteData!.buffer
-          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      final byteData = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
+      Im.Image img = Im.Image.fromBytes(
+          image!.width,
+          image!.height,
+          byteData!.buffer
+              .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      outFile.writeAsBytes(Im.encodeJpg(img));
       Get.snackbar("Saved at:", outFile.path, colorText: Colors.green);
       update();
     }
