@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 class Designation {
   String text = '';
   late final Paint paint;
+  double scale = 2;
 
   Designation({required this.text, Paint? lineStyle}) {
     if (lineStyle != null) {
       paint = Paint()
         ..strokeWidth = lineStyle.strokeWidth
         ..color = lineStyle.color;
+
+      scale = 0.14 * paint.strokeWidth;
     } else {
       paint = Paint();
     }
@@ -25,7 +28,7 @@ class Designation {
         text: text,
         style: TextStyle(
           color: paint.color,
-          fontSize: paint.strokeWidth + 40,
+          fontSize: paint.strokeWidth + 120,
         ));
     TextPainter tp = TextPainter(
       text: ts,
@@ -52,7 +55,8 @@ class Designation {
       p1,
       rotatePoint(
           origin: p1,
-          point: Offset(p1.dx + arrowAng, p1.dy - arrowAng / 3),
+          point:
+              Offset(p1.dx + arrowAng * scale, p1.dy - (arrowAng * scale) / 3),
           a: fi),
       paint,
     );
@@ -60,7 +64,8 @@ class Designation {
       p1,
       rotatePoint(
           origin: p1,
-          point: Offset(p1.dx + arrowAng, p1.dy + arrowAng / 3),
+          point:
+              Offset(p1.dx + arrowAng * scale, p1.dy + (arrowAng * scale) / 3),
           a: fi),
       paint,
     );
@@ -122,7 +127,7 @@ class Dimension extends Designation {
         canvas,
         Offset(
           vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
-          -60,
+          -200,
         ));
     canvas.restore();
   }
@@ -160,7 +165,7 @@ class Note extends Designation {
         rotatePoint(
           origin: note,
           point: (fi >= 0) & (fi < pi / 2)
-              ? Offset(note.dx, note.dy + 30)
+              ? Offset(note.dx, note.dy + 60)
               : Offset(note.dx, note.dy),
           a: fi + pi,
         ));
