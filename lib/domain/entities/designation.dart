@@ -16,6 +16,8 @@ class Designation {
     }
   }
 
+  updateOffsets({Offset? p1, Offset? p2}) {}
+
   draw(Canvas canvas) {}
 
   TextPainter drawText() {
@@ -124,6 +126,12 @@ class Dimension extends Designation {
         ));
     canvas.restore();
   }
+
+  @override
+  updateOffsets({Offset? p1, Offset? p2}) {
+    if (p1 != null) start = p1;
+    if (p2 != null) end = p2;
+  }
 }
 
 class Note extends Designation {
@@ -156,5 +164,11 @@ class Note extends Designation {
               : Offset(note.dx, note.dy),
           a: fi + pi,
         ));
+  }
+
+  @override
+  updateOffsets({Offset? p1, Offset? p2}) {
+    if (p1 != null) pointer = p1;
+    if (p2 != null) note = p2;
   }
 }

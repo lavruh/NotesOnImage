@@ -39,14 +39,19 @@ class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
                 onTapDown: (TapDownDetails details) {
                   _state.tapHandler(details.localPosition);
                 },
-                child: SizedBox(
-                  width: _.image!.width.toDouble(),
-                  height: _.image!.height.toDouble(),
-                  child: CustomPaint(
-                    painter: ImagePainter(),
-                    child: Container(),
-                  ),
-                ),
+                onPanUpdate: (DragUpdateDetails details) {
+                  _state.releaseHandler(details.localPosition);
+                },
+                child: _.image != null
+                    ? SizedBox(
+                        width: _.image!.width.toDouble(),
+                        height: _.image!.height.toDouble(),
+                        child: CustomPaint(
+                          painter: ImagePainter(),
+                          child: Container(),
+                        ),
+                      )
+                    : Container(),
               ),
             ),
           ),
