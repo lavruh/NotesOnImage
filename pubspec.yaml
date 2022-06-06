@@ -9,15 +9,16 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.3.8
-  flutter_colorpicker: ^0.6.0
+  flutter_colorpicker: ^1.0.3
   intl: ^0.17.0
   image: ^3.0.8
-  permission_handler: ^8.3.0
+  permission_handler: ^9.2.0
+  zoom_widget: ^0.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
+  flutter_lints: ^2.0.1
   test: ^1.15.7
 
 

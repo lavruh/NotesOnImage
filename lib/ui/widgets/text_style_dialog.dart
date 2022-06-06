@@ -30,54 +30,54 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
       child: SingleChildScrollView(
         child: Card(
           elevation: 5,
-          child: Wrap(
-            spacing: 5.0,
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                "Discription:",
-                style: Theme.of(context).textTheme.headline5,
-              ),
-              TextField(
-                controller: txtController,
-                decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                        onPressed: () {
-                          _state.setText(txtController.text);
-                          Navigator.of(context, rootNavigator: true).pop();
-                        },
-                        icon: const Icon(Icons.check))),
-              ),
-              Text(
-                "Line weight:",
-                style: Theme.of(context).textTheme.headline5,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DropdownButton(
-                  items: availableSizes,
-                  value: _state.lineWeight,
-                  onChanged: (num? val) {
-                    setState(() {
-                      final size = val?.toDouble() ?? 7;
-                      _state.setLineWeight(size);
-                    });
-                  },
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Wrap(
+              spacing: 5.0,
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                TextField(
+                  controller: txtController,
+                  decoration: InputDecoration(
+                      labelText: "Discription:",
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            _state.setText(txtController.text);
+                            Navigator.of(context, rootNavigator: true).pop();
+                          },
+                          icon: const Icon(Icons.check))),
                 ),
-              ),
-              Text(
-                "Line Color:",
-                style: Theme.of(context).textTheme.headline5,
-              ),
-              SizedBox(
-                height: 200,
-                child: MaterialPicker(
-                  pickerColor: _state.lineColor,
-                  onColorChanged: _state.setLineColor,
+                Text(
+                  "Line weight:",
+                  style: Theme.of(context).textTheme.headline5,
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropdownButton(
+                    items: availableSizes,
+                    value: _state.lineWeight,
+                    onChanged: (num? val) {
+                      setState(() {
+                        final size = val?.toDouble() ?? 7;
+                        _state.setLineWeight(size);
+                      });
+                    },
+                  ),
+                ),
+                Text(
+                  "Line Color:",
+                  style: Theme.of(context).textTheme.headline5,
+                ),
+                SizedBox(
+                  height: 200,
+                  child: MaterialPicker(
+                    pickerColor: _state.lineColor,
+                    onColorChanged: _state.setLineColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -28,7 +28,7 @@ class Designation {
         text: text,
         style: TextStyle(
           color: paint.color,
-          fontSize: paint.strokeWidth + 120,
+          fontSize: paint.strokeWidth + 60,
         ));
     TextPainter tp = TextPainter(
       text: ts,
@@ -127,7 +127,7 @@ class Dimension extends Designation {
         canvas,
         Offset(
           vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
-          -200,
+          -100,
         ));
     canvas.restore();
   }
@@ -165,7 +165,7 @@ class Note extends Designation {
         rotatePoint(
           origin: note,
           point: (fi >= 0) & (fi < pi / 2)
-              ? Offset(note.dx, note.dy + 60)
+              ? Offset(note.dx, note.dy + 30)
               : Offset(note.dx, note.dy),
           a: fi + pi,
         ));

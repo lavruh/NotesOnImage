@@ -1,16 +1,14 @@
-import 'dart:io';
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
+import 'package:zoom_widget/zoom_widget.dart';
 
 // TODO  clean state on init
 class NotesOnImageScreen extends StatefulWidget {
-  NotesOnImageScreen({Key? key}) : super(key: key);
+  const NotesOnImageScreen({Key? key}) : super(key: key);
 
   @override
   State<NotesOnImageScreen> createState() => _NotesOnImageScreenState();
@@ -33,27 +31,24 @@ class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: FittedBox(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTapDown: (TapDownDetails details) {
-                  _state.tapHandler(details.localPosition);
-                },
-                onPanUpdate: (DragUpdateDetails details) {
-                  _state.releaseHandler(details.localPosition);
-                },
-                child: _.image != null
-                    ? SizedBox(
-                        width: _.image!.width.toDouble(),
-                        height: _.image!.height.toDouble(),
+            child: _.image != null
+                ? Zoom(
+                    initZoom: 0,
+                    maxZoomHeight: _.image!.height.toDouble(),
+                    maxZoomWidth: _.image!.width.toDouble(),
+                    child: GestureDetector(
+                        onPanStart: (DragStartDetails details) {
+                          _state.tapHandler(details.localPosition);
+                        },
+                        onPanUpdate: (DragUpdateDetails details) {
+                          _state.releaseHandler(details.localPosition);
+                        },
                         child: CustomPaint(
                           painter: ImagePainter(),
                           child: Container(),
-                        ),
-                      )
-                    : Container(),
-              ),
-            ),
+                        )),
+                  )
+                : Container(),
           ),
           DesignationsPanelWidget(),
         ]);
