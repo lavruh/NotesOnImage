@@ -15,10 +15,11 @@ enum DesignationMode { dimension, note }
 
 class DesignationOnImageState extends GetxController {
   final objects = <Designation>[].obs();
+  bool isDrawing = false;
   Offset? p1;
   Offset? p2;
   String text = '';
-  DesignationMode? mode;
+  DesignationMode? _mode;
   ui.Image? image;
   Paint lineStyle = Paint()
     ..color = Colors.lightGreenAccent
@@ -40,6 +41,12 @@ class DesignationOnImageState extends GetxController {
   String get pathBase => _path;
   String get fileName => _fileName;
   String get fileExt => _fileExtension;
+  DesignationMode? get mode => _mode;
+
+  set mode(DesignationMode? m) {
+    _mode = m;
+    isDrawing = true;
+  }
 
   loadImage(File f) async {
     if (await Permission.storage.status.isDenied) {
@@ -112,6 +119,7 @@ class DesignationOnImageState extends GetxController {
 
   releaseHandler(Offset pos) {
     p2 = pos;
+    isDrawing = false;
     if (objects.isNotEmpty) {
       objects.last.updateOffsets(p2: pos);
     }

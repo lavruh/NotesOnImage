@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
+import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
 import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
@@ -36,12 +37,23 @@ class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
                     initZoom: 0,
                     maxZoomHeight: _.image!.height.toDouble(),
                     maxZoomWidth: _.image!.width.toDouble(),
-                    child: GestureDetector(
-                        onPanStart: (DragStartDetails details) {
-                          _state.tapHandler(details.localPosition);
-                        },
-                        onPanUpdate: (DragUpdateDetails details) {
-                          _state.releaseHandler(details.localPosition);
+                    child: RawGestureDetector(
+                        gestures: <Type, GestureRecognizerFactory>{
+                          CustomPanGestureRecognizer:
+                              GestureRecognizerFactoryWithHandlers<
+                                  CustomPanGestureRecognizer>(
+                            () => CustomPanGestureRecognizer(
+                                onPanDown: (Offset details) {
+                                  _.tapHandler(details);
+                                  print("Drawing -> ${_.isDrawing}");
+                                  return _.isDrawing;
+                                },
+                                onPanUpdate: (details) {
+                                  _.releaseHandler(details.localPosition);
+                                },
+                                onPanEnd: (details) {}),
+                            (CustomPanGestureRecognizer instance) {},
+                          ),
                         },
                         child: CustomPaint(
                           painter: ImagePainter(),
