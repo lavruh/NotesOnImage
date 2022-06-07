@@ -10,7 +10,7 @@ main() {
       ['/root/folder', 'somename_', '.png'],
     ];
     for (var i in data) {
-      state.path = '${i[0]}/${i[1]}${i[2]}';
+      state.sourcePath = '${i[0]}/${i[1]}${i[2]}';
       expect(state.pathBase, i[0]);
       expect(state.fileName, i[1]);
       expect(state.fileExt, i[2]);

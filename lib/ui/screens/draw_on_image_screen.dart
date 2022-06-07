@@ -7,22 +7,8 @@ import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
 import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
-// TODO  clean state on init
-class NotesOnImageScreen extends StatefulWidget {
+class NotesOnImageScreen extends StatelessWidget {
   const NotesOnImageScreen({Key? key}) : super(key: key);
-
-  @override
-  State<NotesOnImageScreen> createState() => _NotesOnImageScreenState();
-}
-
-class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
-  final _state = Get.find<DesignationOnImageState>();
-
-  @override
-  void initState() {
-    _state.onInit();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +29,14 @@ class _NotesOnImageScreenState extends State<NotesOnImageScreen> {
                               GestureRecognizerFactoryWithHandlers<
                                   CustomPanGestureRecognizer>(
                             () => CustomPanGestureRecognizer(
-                                onPanDown: (Offset details) {
-                                  _.tapHandler(details);
-                                  print("Drawing -> ${_.isDrawing}");
-                                  return _.isDrawing;
-                                },
-                                onPanUpdate: (details) {
-                                  _.releaseHandler(details.localPosition);
-                                },
-                                onPanEnd: (details) {}),
+                              onPanDown: (Offset details) {
+                                _.tapHandler(details);
+                                return _.isDrawing;
+                              },
+                              onPanUpdate: (details) {
+                                _.releaseHandler(details.localPosition);
+                              },
+                            ),
                             (CustomPanGestureRecognizer instance) {},
                           ),
                         },
@@ -81,7 +66,7 @@ class ImagePainter extends CustomPainter {
     for (Designation o in _state.objects) {
       o.draw(canvas);
     }
-    _state.image_size = size;
+    _state.imageSize = size;
   }
 
   @override

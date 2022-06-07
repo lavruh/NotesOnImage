@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
@@ -33,18 +32,19 @@ class DesignationsPanelWidget extends StatelessWidget {
             IconButton(
                 onPressed: () {
                   showDialog(
-                      context: context, builder: (_) => TextStyleDialog());
+                      context: context,
+                      builder: (_) => const TextStyleDialog());
                   _state.mode = DesignationMode.note;
                 },
                 icon: const Icon(Icons.arrow_right_alt)),
             IconButton(
                 onPressed: () {
                   showDialog(
-                      context: context, builder: (_) => TextStyleDialog());
+                      context: context,
+                      builder: (_) => const TextStyleDialog());
                   _state.mode = DesignationMode.dimension;
                 },
                 icon: const Icon(Icons.open_in_full)),
-            
           ],
         ),
       ),

@@ -16,18 +16,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _state = Get.put<DesignationOnImageState>(DesignationOnImageState());
+    final state = Get.put<DesignationOnImageState>(DesignationOnImageState());
     if (Platform.isLinux) {
-      _state.loadImage(File("/home/lavruh/Screenshot_20200409_212221.jpg"));
+      state.loadImage(File("/home/lavruh/Screenshot_20200409_212221.jpg"));
     } else if (Platform.isAndroid) {
-      _state.loadImage(File("/storage/emulated/0/DCIM/test.jpg"));
+      state.loadImage(File("/storage/emulated/0/DCIM/test.jpg"));
     }
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: NotesOnImageScreen(),
+      home: const NotesOnImageScreen(),
     );
   }
 }

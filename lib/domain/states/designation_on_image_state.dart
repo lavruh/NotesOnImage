@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as Im;
+import 'package:image/image.dart' as image_util;
 import 'package:get/get.dart';
-
+import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 enum DesignationMode { dimension, note }
-
-// TODO bigger sizes arrows, text
 
 class DesignationOnImageState extends GetxController {
   final objects = <Designation>[].obs();
@@ -24,21 +23,21 @@ class DesignationOnImageState extends GetxController {
   Paint lineStyle = Paint()
     ..color = Colors.lightGreenAccent
     ..strokeWidth = 8.0;
-  late Size image_size;
-  String _path = '';
+  late Size imageSize;
+  String _sourcePath = '';
   String _fileName = '';
   String _fileExtension = '';
 
-  set path(String p) {
+  set sourcePath(String p) {
     final delim = p.lastIndexOf('/');
-    _path = p.substring(0, delim);
+    _sourcePath = p.substring(0, delim);
     final n = p.substring(delim + 1);
     _fileName = n.substring(0, n.length - 4);
     _fileExtension = n.substring(n.length - 4);
   }
 
-  String get path => "$_path/$_fileName$_fileExtension";
-  String get pathBase => _path;
+  String get sourcePath => path.join(_sourcePath, "$_fileName$_fileExtension");
+  String get pathBase => _sourcePath;
   String get fileName => _fileName;
   String get fileExt => _fileExtension;
   DesignationMode? get mode => _mode;
@@ -49,14 +48,10 @@ class DesignationOnImageState extends GetxController {
   }
 
   loadImage(File f) async {
-    if (await Permission.storage.status.isDenied) {
-      Permission.storage.request();
-      update();
-    }
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
-    path = f.path;
-    image_size = Size(image!.width.toDouble(), image!.height.toDouble());
+    sourcePath = f.path;
+    imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
     update();
   }
 
@@ -66,25 +61,22 @@ class DesignationOnImageState extends GetxController {
   }
 
   saveImage() async {
-    if (await Permission.manageExternalStorage.status.isDenied) {
-      Permission.manageExternalStorage.request();
-    }
     if (image != null) {
       final rec = ui.PictureRecorder();
       final canvas = Canvas(rec);
       final painter = ImagePainter();
-      painter.paint(canvas, image_size);
+      painter.paint(canvas, imageSize);
       final picture = rec.endRecording();
       final im = await picture.toImage(image!.width, image!.height);
-      final outFile =
-          File("$_path/${_fileName}_${generateNamePrefix()}$fileExt");
+      final outFile = File(path.join(
+          _sourcePath, "${_fileName}_${generateNamePrefix()}$fileExt"));
       final byteData = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
-      Im.Image img = Im.Image.fromBytes(
+      image_util.Image img = image_util.Image.fromBytes(
           image!.width,
           image!.height,
           byteData!.buffer
               .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      outFile.writeAsBytes(Im.encodeJpg(img));
+      outFile.writeAsBytes(image_util.encodeJpg(img));
       Get.snackbar("Saved at:", outFile.path, colorText: Colors.green);
       update();
     }
@@ -156,15 +148,43 @@ class DesignationOnImageState extends GetxController {
         note: p2!,
         lineStyle: lineStyle,
       ));
-      p1 = null;
-      p2 = null;
       mode = null;
     }
   }
 
   @override
-  void onInit() {
+  void onInit() async {
+    if (await isPermissionsGranted() == false) {
+      throw Exception("No permissions to open file");
+    }
     objects.clear();
     super.onInit();
+  }
+
+  Future<bool> isPermissionsGranted() async {
+    bool fl = true;
+    int v = await getAndroidVersion() ?? 5;
+    if (v >= 12) {
+      // Request of this permission on old devices leads to crash
+      if (fl && await Permission.manageExternalStorage.status.isDenied) {
+        fl = await Permission.manageExternalStorage.request().isGranted;
+      }
+    } else {
+      if (fl && await Permission.storage.status.isDenied) {
+        fl = await Permission.storage.request().isGranted;
+      }
+    }
+
+    return fl;
+  }
+
+  Future<int?> getAndroidVersion() async {
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      final androidVersion = androidInfo.version.release ?? '5';
+      return int.parse(androidVersion.split('.')[0]);
+    }
+    return null;
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 
-// TODO load pre size settings
 class TextStyleDialog extends StatefulWidget {
   const TextStyleDialog({Key? key}) : super(key: key);
 
@@ -16,8 +15,8 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
   List<DropdownMenuItem<int>> availableSizes = List.generate(
       10,
       (index) => DropdownMenuItem(
-            child: Text(((index + 1) * 2).toString()),
             value: (index + 1) * 2,
+            child: Text(((index + 1) * 2).toString()),
           ));
 
   final _state = Get.find<DesignationOnImageState>();

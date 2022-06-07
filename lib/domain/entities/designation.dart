@@ -159,7 +159,6 @@ class Note extends Designation {
     canvas.drawLine(pointer, note, paint);
     drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -45, fi: fi);
 
-    Offset textOffset = Offset(note.dx + 30, note.dy + 30);
     drawText().paint(
         canvas,
         rotatePoint(
