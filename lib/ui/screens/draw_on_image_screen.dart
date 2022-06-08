@@ -34,7 +34,7 @@ class NotesOnImageScreen extends StatelessWidget {
                                 return _.isDrawing;
                               },
                               onPanUpdate: (details) {
-                                _.releaseHandler(details.localPosition);
+                                _.updatePoint(details.localPosition);
                               },
                             ),
                             (CustomPanGestureRecognizer instance) {},
@@ -63,7 +63,7 @@ class ImagePainter extends CustomPainter {
     if (img != null) {
       canvas.drawImage(img, const Offset(0, 0), Paint());
     }
-    for (Designation o in _state.objects) {
+    for (Designation o in _state.objects.values) {
       o.draw(canvas);
     }
     _state.imageSize = size;
@@ -72,5 +72,25 @@ class ImagePainter extends CustomPainter {
   @override
   bool shouldRepaint(ImagePainter oldDelegate) {
     return true;
+  }
+
+  @override
+  bool? hitTest(ui.Offset position) {
+    for (Designation o in _state.objects.values) {
+      final pointIndex = o.isTouched(position);
+      if (pointIndex == 1) {
+        _state.objUpdateCallback = (val) {
+          _state.objects[o.id]!.updateOffsets(p1: val);
+        };
+        _state.isDrawing = true;
+      }
+      if (pointIndex == 2) {
+        _state.objUpdateCallback = (val) {
+          _state.objects[o.id]!.updateOffsets(p2: val);
+        };
+        _state.isDrawing = true;
+      }
+    }
+    return _state.isDrawing;
   }
 }

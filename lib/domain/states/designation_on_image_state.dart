@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image_util;
 import 'package:get/get.dart';
+import 'package:notes_on_image/domain/entities/dimension.dart';
+import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
@@ -13,16 +15,18 @@ import 'package:permission_handler/permission_handler.dart';
 enum DesignationMode { dimension, note }
 
 class DesignationOnImageState extends GetxController {
-  final objects = <Designation>[].obs();
+  final objects = <int, Designation>{}.obs();
+  List<int> objectsSequence = [];
   bool isDrawing = false;
-  Offset? p1;
-  Offset? p2;
+  Offset? pointToUpdate;
+  Function(Offset)? objUpdateCallback;
   String text = '';
   DesignationMode? _mode;
-  ui.Image? image;
   Paint lineStyle = Paint()
     ..color = Colors.lightGreenAccent
     ..strokeWidth = 8.0;
+
+  ui.Image? image;
   late Size imageSize;
   String _sourcePath = '';
   String _fileName = '';
@@ -56,8 +60,11 @@ class DesignationOnImageState extends GetxController {
   }
 
   undo() {
-    objects.removeLast();
-    update();
+    if (objectsSequence.isNotEmpty) {
+      final id = objectsSequence.removeLast();
+      objects.remove(id);
+      update();
+    }
   }
 
   saveImage() async {
@@ -103,53 +110,45 @@ class DesignationOnImageState extends GetxController {
   }
 
   tapHandler(Offset pos) {
-    p1 = pos;
-    p2 = pos;
-    addDesignation();
-    update();
+    if (isDrawing && mode != null) {
+      addDesignation(pos, pos);
+      update();
+    }
   }
 
-  releaseHandler(Offset pos) {
-    p2 = pos;
+  updatePoint(Offset pos) {
     isDrawing = false;
-    if (objects.isNotEmpty) {
-      objects.last.updateOffsets(p2: pos);
+    if (objUpdateCallback != null) {
+      objUpdateCallback!(pos);
     }
     update();
   }
 
-  addDesignation() {
+  addDesignation(Offset p1, Offset p2) {
+    late final Designation dimension;
     if (mode == DesignationMode.dimension) {
-      addDimension();
+      dimension = Dimension(
+        text: text,
+        start: p1,
+        end: p2,
+        lineStyle: lineStyle,
+      );
     }
     if (mode == DesignationMode.note) {
-      addNote();
+      dimension = Note(
+        text: text,
+        start: p1,
+        end: p2,
+        lineStyle: lineStyle,
+      );
     }
+    objects.putIfAbsent(dimension.id, (() => dimension));
+    objectsSequence.add(dimension.id);
+    objUpdateCallback = ((val) {
+      objects[dimension.id]!.updateOffsets(p2: val);
+    });
+    mode = null;
     update();
-  }
-
-  addDimension() {
-    if (p1 != null && p2 != null) {
-      objects.add(Dimension(
-        text: text,
-        start: p1!,
-        end: p2!,
-        lineStyle: lineStyle,
-      ));
-      mode = null;
-    }
-  }
-
-  addNote() {
-    if (p1 != null && p2 != null) {
-      objects.add(Note(
-        text: text,
-        pointer: p1!,
-        note: p2!,
-        lineStyle: lineStyle,
-      ));
-      mode = null;
-    }
   }
 
   @override

@@ -2,12 +2,21 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class Designation {
+abstract class Designation {
+  final int _id;
   String text = '';
   late final Paint paint;
   double scale = 2;
+  Offset start;
+  Offset end;
 
-  Designation({required this.text, Paint? lineStyle}) {
+  Designation({
+    int? id,
+    required this.text,
+    Paint? lineStyle,
+    required this.start,
+    required this.end,
+  }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
     if (lineStyle != null) {
       paint = Paint()
         ..strokeWidth = lineStyle.strokeWidth
@@ -19,9 +28,30 @@ class Designation {
     }
   }
 
-  updateOffsets({Offset? p1, Offset? p2}) {}
+  int get id => _id;
 
-  draw(Canvas canvas) {}
+  updateOffsets({Offset? p1, Offset? p2}) {
+    if (p1 != null) start = p1;
+    if (p2 != null) end = p2;
+  }
+
+  draw(Canvas canvas);
+
+  int isTouched(Offset point) {
+    final path = Path();
+    path.addOval(Rect.fromCircle(center: start, radius: 150));
+    path.close();
+    if (path.contains(point)) {
+      return 1;
+    }
+    final path2 = Path();
+    path2.addOval(Rect.fromCircle(center: end, radius: 150));
+    path2.close();
+    if (path2.contains(point)) {
+      return 2;
+    }
+    return 0;
+  }
 
   TextPainter drawText() {
     TextSpan ts = TextSpan(
@@ -99,80 +129,5 @@ class Designation {
 
   Offset midPoint({required Offset p1, required Offset p2}) {
     return Offset(p1.dx - p2.dx, p1.dy - p2.dy);
-  }
-}
-
-class Dimension extends Designation {
-  Offset end;
-  Offset start;
-
-  Dimension({
-    required String text,
-    required this.start,
-    required this.end,
-    Paint? lineStyle,
-  }) : super(text: text, lineStyle: lineStyle);
-
-  @override
-  draw(Canvas canvas) {
-    canvas.drawLine(start, end, paint);
-    double fi = getDirection(start, end);
-    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
-    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 45, fi: fi);
-    canvas.save();
-    canvas.translate(start.dx, start.dy);
-    canvas.rotate(fi + pi);
-    TextPainter tp = drawText();
-    tp.paint(
-        canvas,
-        Offset(
-          vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
-          -100,
-        ));
-    canvas.restore();
-  }
-
-  @override
-  updateOffsets({Offset? p1, Offset? p2}) {
-    if (p1 != null) start = p1;
-    if (p2 != null) end = p2;
-  }
-}
-
-class Note extends Designation {
-  Offset pointer;
-  Offset note;
-
-  Note({
-    required this.pointer,
-    required this.note,
-    required String text,
-    Paint? lineStyle,
-  }) : super(
-          text: text,
-          lineStyle: lineStyle,
-        );
-
-  @override
-  draw(Canvas canvas) {
-    double fi = getDirection(pointer, note);
-    canvas.drawLine(pointer, note, paint);
-    drawArrow(canvas: canvas, p1: pointer, p2: note, arrowAng: -45, fi: fi);
-
-    drawText().paint(
-        canvas,
-        rotatePoint(
-          origin: note,
-          point: (fi >= 0) & (fi < pi / 2)
-              ? Offset(note.dx, note.dy + 30)
-              : Offset(note.dx, note.dy),
-          a: fi + pi,
-        ));
-  }
-
-  @override
-  updateOffsets({Offset? p1, Offset? p2}) {
-    if (p1 != null) pointer = p1;
-    if (p2 != null) note = p2;
   }
 }
