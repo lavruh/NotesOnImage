@@ -42,7 +42,7 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                       labelText: "Discription:",
                       suffixIcon: IconButton(
                           onPressed: () {
-                            _state.setText(txtController.text);
+                            _state.text = txtController.text;
                             Navigator.of(context, rootNavigator: true).pop();
                           },
                           icon: const Icon(Icons.check))),
@@ -58,21 +58,16 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                     value: _state.lineWeight,
                     onChanged: (num? val) {
                       setState(() {
-                        final size = val?.toDouble() ?? 7;
-                        _state.setLineWeight(size);
+                        _state.lineWeight = val?.toDouble() ?? 7;
                       });
                     },
                   ),
-                ),
-                Text(
-                  "Line Color:",
-                  style: Theme.of(context).textTheme.headline5,
                 ),
                 SizedBox(
                   height: 200,
                   child: MaterialPicker(
                     pickerColor: _state.lineColor,
-                    onColorChanged: _state.setLineColor,
+                    onColorChanged: (color) => _state.lineColor = color,
                   ),
                 ),
               ],
@@ -82,4 +77,6 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
       ),
     );
   }
+
+  _confirm() {}
 }

@@ -15,7 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 enum DesignationMode { dimension, note }
 
 class DesignationOnImageState extends GetxController {
-  final objects = <int, Designation>{}.obs();
+  Map<int, Designation> objects = {};
   List<int> objectsSequence = [];
   bool isDrawing = false;
   Offset? pointToUpdate;
@@ -59,14 +59,6 @@ class DesignationOnImageState extends GetxController {
     update();
   }
 
-  undo() {
-    if (objectsSequence.isNotEmpty) {
-      final id = objectsSequence.removeLast();
-      objects.remove(id);
-      update();
-    }
-  }
-
   saveImage() async {
     if (image != null) {
       final rec = ui.PictureRecorder();
@@ -93,21 +85,18 @@ class DesignationOnImageState extends GetxController {
     return DateFormat("msS").format(DateTime.now());
   }
 
-  setText(String val) {
-    text = val;
+  undo() {
+    if (objectsSequence.isNotEmpty) {
+      final id = objectsSequence.removeLast();
+      objects.remove(id);
+      update();
+    }
   }
 
   double get lineWeight => lineStyle.strokeWidth;
-
-  setLineWeight(double val) {
-    lineStyle.strokeWidth = val;
-  }
-
+  set lineWeight(double val) => lineStyle.strokeWidth = val;
   Color get lineColor => lineStyle.color;
-
-  setLineColor(Color val) {
-    lineStyle.color = val;
-  }
+  set lineColor(Color val) => lineStyle.color = val;
 
   tapHandler(Offset pos) {
     if (isDrawing && mode != null) {
@@ -149,6 +138,26 @@ class DesignationOnImageState extends GetxController {
     });
     mode = null;
     update();
+  }
+
+  initUpdateDesignitionAtPosition(Offset position) {
+    for (Designation o in objects.values) {
+      final pointIndex = o.isTouched(position);
+      if (pointIndex == 1) {
+        objUpdateCallback = (val) {
+          objects[o.id]!.updateOffsets(p1: val);
+        };
+        isDrawing = true;
+        break;
+      }
+      if (pointIndex == 2) {
+        objUpdateCallback = (val) {
+          objects[o.id]!.updateOffsets(p2: val);
+        };
+        isDrawing = true;
+        break;
+      }
+    }
   }
 
   @override

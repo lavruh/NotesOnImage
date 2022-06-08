@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     } else if (Platform.isAndroid) {
       state.loadImage(File("/storage/emulated/0/DCIM/test.jpg"));
     }
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,

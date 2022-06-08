@@ -75,22 +75,8 @@ class ImagePainter extends CustomPainter {
   }
 
   @override
-  bool? hitTest(ui.Offset position) {
-    for (Designation o in _state.objects.values) {
-      final pointIndex = o.isTouched(position);
-      if (pointIndex == 1) {
-        _state.objUpdateCallback = (val) {
-          _state.objects[o.id]!.updateOffsets(p1: val);
-        };
-        _state.isDrawing = true;
-      }
-      if (pointIndex == 2) {
-        _state.objUpdateCallback = (val) {
-          _state.objects[o.id]!.updateOffsets(p2: val);
-        };
-        _state.isDrawing = true;
-      }
-    }
+  bool? hitTest(Offset position) {
+    _state.initUpdateDesignitionAtPosition(position);
     return _state.isDrawing;
   }
 }
