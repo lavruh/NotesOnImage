@@ -5,30 +5,36 @@ import 'package:flutter/material.dart';
 abstract class Designation {
   final int _id;
   String text = '';
-  late final Paint paint;
+  late Paint paint;
   double scale = 2;
   Offset start;
   Offset end;
+  late Offset textPosition;
 
   Designation({
     int? id,
-    required this.text,
+    this.text = '',
     Paint? lineStyle,
-    required this.start,
-    required this.end,
+    this.start = const Offset(0, 0),
+    this.end = const Offset(0, 0),
   }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
     if (lineStyle != null) {
       paint = Paint()
         ..strokeWidth = lineStyle.strokeWidth
         ..color = lineStyle.color;
-
-      scale = 0.14 * paint.strokeWidth;
     } else {
-      paint = Paint();
+      paint = Paint()
+        ..color = Colors.lightGreenAccent
+        ..strokeWidth = 8.0;
     }
+    scale = 0.14 * paint.strokeWidth;
   }
 
   int get id => _id;
+  double get lineWeight => paint.strokeWidth;
+  set lineWeight(double val) => paint.strokeWidth = val;
+  Color get lineColor => paint.color;
+  set lineColor(Color val) => paint.color = val;
 
   updateOffsets({Offset? p1, Offset? p2}) {
     if (p1 != null) start = p1;
@@ -39,16 +45,22 @@ abstract class Designation {
 
   int isTouched(Offset point) {
     final path = Path();
-    path.addOval(Rect.fromCircle(center: start, radius: 150));
+    path.addOval(Rect.fromCircle(center: start, radius: 75));
     path.close();
     if (path.contains(point)) {
       return 1;
     }
     final path2 = Path();
-    path2.addOval(Rect.fromCircle(center: end, radius: 150));
+    path2.addOval(Rect.fromCircle(center: end, radius: 75));
     path2.close();
     if (path2.contains(point)) {
       return 2;
+    }
+    final pathText = Path();
+    pathText.addOval(Rect.fromCircle(center: textPosition, radius: 75));
+    pathText.close();
+    if (pathText.contains(point)) {
+      return 3;
     }
     return 0;
   }

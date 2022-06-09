@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image_util;
 import 'package:get/get.dart';
-import 'package:notes_on_image/domain/entities/dimension.dart';
-import 'package:notes_on_image/domain/entities/note.dart';
+import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
@@ -18,13 +17,10 @@ class DesignationOnImageState extends GetxController {
   Map<int, Designation> objects = {};
   List<int> objectsSequence = [];
   bool isDrawing = false;
-  Offset? pointToUpdate;
+
+  Designation? _tmpItem;
+
   Function(Offset)? objUpdateCallback;
-  String text = '';
-  DesignationMode? _mode;
-  Paint lineStyle = Paint()
-    ..color = Colors.lightGreenAccent
-    ..strokeWidth = 8.0;
 
   ui.Image? image;
   late Size imageSize;
@@ -44,12 +40,6 @@ class DesignationOnImageState extends GetxController {
   String get pathBase => _sourcePath;
   String get fileName => _fileName;
   String get fileExt => _fileExtension;
-  DesignationMode? get mode => _mode;
-
-  set mode(DesignationMode? m) {
-    _mode = m;
-    isDrawing = true;
-  }
 
   loadImage(File f) async {
     final data = await f.readAsBytes();
@@ -93,14 +83,26 @@ class DesignationOnImageState extends GetxController {
     }
   }
 
-  double get lineWeight => lineStyle.strokeWidth;
-  set lineWeight(double val) => lineStyle.strokeWidth = val;
-  Color get lineColor => lineStyle.color;
-  set lineColor(Color val) => lineStyle.color = val;
+  initAddDesignation(Designation item) async {
+    _tmpItem = await Get.dialog<Designation>(TextStyleDialog(
+      item: item,
+    ));
+    if (_tmpItem != null) {
+      isDrawing = true;
+    }
+  }
 
   tapHandler(Offset pos) {
-    if (isDrawing && mode != null) {
-      addDesignation(pos, pos);
+    if (isDrawing && _tmpItem != null) {
+      final Designation designation = _tmpItem!;
+      designation.start = pos;
+      designation.end = pos;
+      objects.putIfAbsent(designation.id, (() => designation));
+      objectsSequence.add(designation.id);
+      objUpdateCallback = ((val) {
+        objects[designation.id]!.updateOffsets(p2: val);
+      });
+      _tmpItem = null;
       update();
     }
   }
@@ -113,31 +115,14 @@ class DesignationOnImageState extends GetxController {
     update();
   }
 
-  addDesignation(Offset p1, Offset p2) {
-    late final Designation dimension;
-    if (mode == DesignationMode.dimension) {
-      dimension = Dimension(
-        text: text,
-        start: p1,
-        end: p2,
-        lineStyle: lineStyle,
-      );
+  updateDesignationStyle(Designation item) async {
+    final updatedItem = await Get.dialog<Designation>(TextStyleDialog(
+      item: item,
+    ));
+    if (updatedItem != null && objects.containsKey(updatedItem.id)) {
+      objects[updatedItem.id] = updatedItem;
+      update();
     }
-    if (mode == DesignationMode.note) {
-      dimension = Note(
-        text: text,
-        start: p1,
-        end: p2,
-        lineStyle: lineStyle,
-      );
-    }
-    objects.putIfAbsent(dimension.id, (() => dimension));
-    objectsSequence.add(dimension.id);
-    objUpdateCallback = ((val) {
-      objects[dimension.id]!.updateOffsets(p2: val);
-    });
-    mode = null;
-    update();
   }
 
   initUpdateDesignitionAtPosition(Offset position) {
@@ -155,6 +140,10 @@ class DesignationOnImageState extends GetxController {
           objects[o.id]!.updateOffsets(p2: val);
         };
         isDrawing = true;
+        break;
+      }
+      if (pointIndex == 3) {
+        updateDesignationStyle(o);
         break;
       }
     }

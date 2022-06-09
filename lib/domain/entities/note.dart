@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 
 class Note extends Designation {
+  late Offset lineEnd;
   Note({
     required Offset start,
     required Offset end,
@@ -16,20 +17,32 @@ class Note extends Designation {
           end: end,
         );
 
+  Note.empty()
+      : super(
+          text: '',
+          start: const Offset(0, 0),
+          end: const Offset(0, 0),
+        );
+
   @override
   draw(Canvas canvas) {
-    double fi = getDirection(start, end);
+    final fi = getDirection(start, end);
+    final tp = drawText();
+    final textCenter = (fi >= 0) & (fi < pi)
+        ? end - Offset(tp.width / 2, (tp.height + 100) / 2)
+        : end - Offset(tp.width / 2, (tp.height - 100) / 2);
+    textPosition = textCenter + Offset(tp.width / 2, tp.height / 2);
+    lineEnd = rotatePoint(
+      origin: textCenter,
+      point: textCenter + Offset(-(tp.width + 5 / 2), 0),
+      a: fi + pi,
+    );
+
+    tp.paint(
+      canvas,
+      textCenter,
+    );
     canvas.drawLine(start, end, paint);
     drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
-
-    drawText().paint(
-        canvas,
-        rotatePoint(
-          origin: end,
-          point: (fi >= 0) & (fi < pi / 2)
-              ? Offset(end.dx, end.dy + 30)
-              : Offset(end.dx, end.dy),
-          a: fi + pi,
-        ));
   }
 }

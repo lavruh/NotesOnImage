@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:notes_on_image/domain/entities/dimension.dart';
+import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
-import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
 
 class DesignationsPanelWidget extends StatelessWidget {
   final _state = Get.find<DesignationOnImageState>();
@@ -31,18 +32,12 @@ class DesignationsPanelWidget extends StatelessWidget {
                 icon: const Icon(Icons.undo)),
             IconButton(
                 onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) => const TextStyleDialog());
-                  _state.mode = DesignationMode.note;
+                  _state.initAddDesignation(Note.empty());
                 },
                 icon: const Icon(Icons.arrow_right_alt)),
             IconButton(
                 onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) => const TextStyleDialog());
-                  _state.mode = DesignationMode.dimension;
+                  _state.initAddDesignation(Dimension.empty());
                 },
                 icon: const Icon(Icons.open_in_full)),
           ],

@@ -16,10 +16,18 @@ class Dimension extends Designation {
           end: end,
         );
 
+  Dimension.empty()
+      : super(
+          text: '',
+          start: const Offset(0, 0),
+          end: const Offset(0, 0),
+        );
+
   @override
   draw(Canvas canvas) {
     canvas.drawLine(start, end, paint);
     double fi = getDirection(start, end);
+    textPosition = start + (end - start) / 2;
     drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
     drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 45, fi: fi);
     canvas.save();
@@ -32,6 +40,7 @@ class Dimension extends Designation {
           vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
           -100,
         ));
+    canvas.translate(-start.dx, -start.dy);
     canvas.restore();
   }
 }

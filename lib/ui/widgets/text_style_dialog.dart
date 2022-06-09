@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:get/get.dart';
-import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
+import 'package:notes_on_image/domain/entities/designation.dart';
 
 class TextStyleDialog extends StatefulWidget {
-  const TextStyleDialog({Key? key}) : super(key: key);
-
+  const TextStyleDialog({Key? key, required this.item}) : super(key: key);
+  final Designation item;
   @override
   State<TextStyleDialog> createState() => _TextStyleDialogState();
 }
 
 class _TextStyleDialogState extends State<TextStyleDialog> {
-  TextEditingController txtController = TextEditingController();
   List<DropdownMenuItem<int>> availableSizes = List.generate(
       10,
       (index) => DropdownMenuItem(
             value: (index + 1) * 2,
             child: Text(((index + 1) * 2).toString()),
           ));
-
-  final _state = Get.find<DesignationOnImageState>();
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +33,12 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 TextField(
-                  controller: txtController,
+                  controller: TextEditingController(text: widget.item.text),
+                  onChanged: _textChanged,
                   decoration: InputDecoration(
                       labelText: "Discription:",
                       suffixIcon: IconButton(
-                          onPressed: () {
-                            _state.text = txtController.text;
-                            Navigator.of(context, rootNavigator: true).pop();
-                          },
-                          icon: const Icon(Icons.check))),
+                          onPressed: _confirm, icon: const Icon(Icons.check))),
                 ),
                 Text(
                   "Line weight:",
@@ -55,19 +48,15 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                   padding: const EdgeInsets.all(8.0),
                   child: DropdownButton(
                     items: availableSizes,
-                    value: _state.lineWeight,
-                    onChanged: (num? val) {
-                      setState(() {
-                        _state.lineWeight = val?.toDouble() ?? 7;
-                      });
-                    },
+                    value: widget.item.lineWeight,
+                    onChanged: _lineWeightChanged,
                   ),
                 ),
                 SizedBox(
                   height: 200,
                   child: MaterialPicker(
-                    pickerColor: _state.lineColor,
-                    onColorChanged: (color) => _state.lineColor = color,
+                    pickerColor: widget.item.lineColor,
+                    onColorChanged: _colorChanged,
                   ),
                 ),
               ],
@@ -78,5 +67,20 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
     );
   }
 
-  _confirm() {}
+  void _textChanged(String val) {
+    widget.item.text = val;
+  }
+
+  void _lineWeightChanged(num? value) {
+    widget.item.lineWeight = value?.toDouble() ?? 7;
+    setState(() {});
+  }
+
+  void _colorChanged(Color value) {
+    widget.item.lineColor = value;
+  }
+
+  void _confirm() {
+    Navigator.of(context, rootNavigator: true).pop<Designation>(widget.item);
+  }
 }
