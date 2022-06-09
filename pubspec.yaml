@@ -1,7 +1,7 @@
 name: notes_on_image
 description: A new Flutter project.
 publish_to: 'none'
-version: 1.2.3+1
+version: 1.2.4+1
 environment:
   sdk: ">=2.15.0-116.0.dev <3.0.0"
 
@@ -16,6 +16,7 @@ dependencies:
   zoom_widget: ^0.2.1
   device_info_plus: ^3.2.4
   path: ^1.8.1
+  simple_speed_dial: ^0.1.7
 
 dev_dependencies:
   flutter_test:

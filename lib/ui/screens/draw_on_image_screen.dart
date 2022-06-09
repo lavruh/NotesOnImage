@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
+import 'package:notes_on_image/ui/widgets/action_button_menu_widget.dart';
 import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
-import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
+import 'package:notes_on_image/ui/widgets/save_confirm_dialog.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
 class NotesOnImageScreen extends StatelessWidget {
@@ -12,10 +13,20 @@ class NotesOnImageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GetBuilder<DesignationOnImageState>(builder: (_) {
-        return Stack(alignment: AlignmentDirectional.bottomCenter, children: [
-          SizedBox(
+    return WillPopScope(
+      onWillPop: () async {
+        final state = Get.find<DesignationOnImageState>();
+        if (state.isChanged()) {
+          if (await Get.dialog(const SaveConfirmDialog())) {
+            await state.saveImage();
+          }
+        }
+        state.image = null;
+        return true;
+      },
+      child: Scaffold(
+        body: GetBuilder<DesignationOnImageState>(builder: (_) {
+          return SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: _.image != null
@@ -46,10 +57,10 @@ class NotesOnImageScreen extends StatelessWidget {
                         )),
                   )
                 : Container(),
-          ),
-          DesignationsPanelWidget(),
-        ]);
-      }),
+          );
+        }),
+        floatingActionButton: const ActionButtonMenuWidget(),
+      ),
     );
   }
 }

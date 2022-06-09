@@ -41,7 +41,16 @@ class DesignationOnImageState extends GetxController {
   String get fileName => _fileName;
   String get fileExt => _fileExtension;
 
+  bool isChanged() {
+    if (objectsSequence.isNotEmpty) {
+      return true;
+    }
+    return false;
+  }
+
   loadImage(File f) async {
+    objects.clear();
+    objectsSequence.clear();
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
     sourcePath = f.path;
