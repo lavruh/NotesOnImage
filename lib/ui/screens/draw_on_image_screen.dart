@@ -17,8 +17,13 @@ class NotesOnImageScreen extends StatelessWidget {
       onWillPop: () async {
         final state = Get.find<DesignationOnImageState>();
         if (state.isChanged()) {
-          if (await Get.dialog(const SaveConfirmDialog())) {
-            await state.saveImage();
+          final haveToSave = await Get.dialog(
+            const SaveConfirmDialog(),
+            transitionDuration: const Duration(milliseconds: 0),
+          );
+          if (haveToSave) {
+            _saveAndPop();
+            return false;
           }
         }
         state.image = null;
@@ -29,7 +34,7 @@ class NotesOnImageScreen extends StatelessWidget {
           return SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: _.image != null
+            child: _.image != null && _.isBusy == false
                 ? Zoom(
                     initZoom: 0,
                     maxZoomHeight: _.image!.height.toDouble(),
@@ -56,12 +61,18 @@ class NotesOnImageScreen extends StatelessWidget {
                           child: Container(),
                         )),
                   )
-                : Container(),
+                : const Center(child: CircularProgressIndicator()),
           );
         }),
         floatingActionButton: const ActionButtonMenuWidget(),
       ),
     );
+  }
+
+  _saveAndPop() async {
+    final state = Get.find<DesignationOnImageState>();
+    await state.saveImage();
+    Get.back();
   }
 }
 

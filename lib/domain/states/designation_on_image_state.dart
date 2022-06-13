@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum DesignationMode { dimension, note }
 
@@ -17,7 +18,7 @@ class DesignationOnImageState extends GetxController {
   Map<int, Designation> objects = {};
   List<int> objectsSequence = [];
   bool isDrawing = false;
-
+  bool isBusy = false;
   Designation? _tmpItem;
 
   Function(Offset)? objUpdateCallback;
@@ -49,16 +50,21 @@ class DesignationOnImageState extends GetxController {
   }
 
   loadImage(File f) async {
+    isBusy = true;
+    update();
     objects.clear();
     objectsSequence.clear();
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
     sourcePath = f.path;
     imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
+    isBusy = false;
     update();
   }
 
-  saveImage() async {
+  Future<String?> saveImage() async {
+    isBusy = true;
+    update();
     if (image != null) {
       final rec = ui.PictureRecorder();
       final canvas = Canvas(rec);
@@ -74,9 +80,19 @@ class DesignationOnImageState extends GetxController {
           image!.height,
           byteData!.buffer
               .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      outFile.writeAsBytes(image_util.encodeJpg(img));
-      Get.snackbar("Saved at:", outFile.path, colorText: Colors.green);
+      await outFile.writeAsBytes(image_util.encodeJpg(img));
+      isBusy = false;
       update();
+      return outFile.path;
+    }
+    return null;
+  }
+
+  shareImage() async {
+    final output = await saveImage();
+    if (output != null) {
+      await Share.shareFiles([output]);
+      File(output).delete();
     }
   }
 

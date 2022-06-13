@@ -9,7 +9,7 @@ abstract class Designation {
   double scale = 2;
   Offset start;
   Offset end;
-  late Offset textPosition;
+  Offset textPosition = const Offset(0, 0);
 
   Designation({
     int? id,
