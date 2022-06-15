@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image_util;
 import 'package:get/get.dart';
+import 'package:notes_on_image/ui/widgets/save_confirm_dialog.dart';
 import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
@@ -83,9 +84,35 @@ class DesignationOnImageState extends GetxController {
       await outFile.writeAsBytes(image_util.encodeJpg(img));
       isBusy = false;
       update();
+      objects.clear();
+      objectsSequence.clear();
       return outFile.path;
     }
     return null;
+  }
+
+  hasToSavePromt({
+    required Function onConfirmCallback,
+    Function? onCancelCallback,
+    Function? onNoCallback,
+  }) async {
+    if (isChanged()) {
+      final haveToSave = await Get.dialog(
+        const SaveConfirmDialog(),
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+      if (haveToSave == true) {
+        onConfirmCallback();
+        return;
+      }
+      if (haveToSave == false) {
+        if (onNoCallback != null) onNoCallback();
+        return;
+      }
+      if (onCancelCallback != null) onCancelCallback();
+    } else {
+      if (onNoCallback != null) onNoCallback();
+    }
   }
 
   shareImage() async {

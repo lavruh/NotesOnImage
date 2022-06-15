@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/action_button_menu_widget.dart';
 import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
-import 'package:notes_on_image/ui/widgets/save_confirm_dialog.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
 class NotesOnImageScreen extends StatelessWidget {
@@ -16,18 +15,16 @@ class NotesOnImageScreen extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         final state = Get.find<DesignationOnImageState>();
-        if (state.isChanged()) {
-          final haveToSave = await Get.dialog(
-            const SaveConfirmDialog(),
-            transitionDuration: const Duration(milliseconds: 0),
-          );
-          if (haveToSave) {
-            _saveAndPop();
-            return false;
-          }
-        }
-        state.image = null;
-        return true;
+        bool leavePage = true;
+        await state.hasToSavePromt(
+            onConfirmCallback: () async {
+              leavePage = false;
+              await state.saveImage();
+              Get.back();
+            },
+            onCancelCallback: () => leavePage = false);
+
+        return leavePage;
       },
       child: Scaffold(
         body: GetBuilder<DesignationOnImageState>(builder: (_) {
@@ -67,12 +64,6 @@ class NotesOnImageScreen extends StatelessWidget {
         floatingActionButton: const ActionButtonMenuWidget(),
       ),
     );
-  }
-
-  _saveAndPop() async {
-    final state = Get.find<DesignationOnImageState>();
-    await state.saveImage();
-    Get.back();
   }
 }
 
