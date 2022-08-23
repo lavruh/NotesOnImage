@@ -212,6 +212,9 @@ class DesignationOnImageState extends GetxController {
 
   Future<bool> isPermissionsGranted() async {
     bool fl = true;
+    if (Platform.isLinux) {
+      return true;
+    }
     int v = await getAndroidVersion() ?? 5;
     if (v >= 12) {
       // Request of this permission on old devices leads to crash
