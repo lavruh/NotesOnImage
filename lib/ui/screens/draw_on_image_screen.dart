@@ -12,8 +12,9 @@ class NotesOnImageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (_) async {
         final state = Get.find<DesignationOnImageState>();
         bool leavePage = true;
         await state.hasToSavePromt(
@@ -23,8 +24,9 @@ class NotesOnImageScreen extends StatelessWidget {
               Get.back();
             },
             onCancelCallback: () => leavePage = false);
-
-        return leavePage;
+        if (leavePage) {
+          Get.back();
+        }
       },
       child: Scaffold(
         body: GetBuilder<DesignationOnImageState>(builder: (_) {
@@ -33,7 +35,7 @@ class NotesOnImageScreen extends StatelessWidget {
             height: MediaQuery.of(context).size.height,
             child: _.image != null && _.isBusy == false
                 ? Zoom(
-                    initZoom: 0,
+                    initTotalZoomOut: true,
                     maxZoomHeight: _.image!.height.toDouble(),
                     maxZoomWidth: _.image!.width.toDouble(),
                     child: RawGestureDetector(

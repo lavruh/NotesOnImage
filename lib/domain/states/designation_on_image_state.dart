@@ -73,15 +73,20 @@ class DesignationOnImageState extends GetxController {
       painter.paint(canvas, imageSize);
       final picture = rec.endRecording();
       final im = await picture.toImage(image!.width, image!.height);
-      final outFile = File(path.join(
-          _sourcePath, "${_fileName}_${generateNamePrefix()}$fileExt"));
-      final byteData = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
-      image_util.Image img = image_util.Image.fromBytes(
-          image!.width,
-          image!.height,
-          byteData!.buffer
-              .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-      await outFile.writeAsBytes(image_util.encodeJpg(img));
+      final outFile =
+          File(path.join(_sourcePath, "${_fileName}_${generateNamePrefix()}$_fileExtension"));
+      final byteData =
+          await im.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (byteData == null) {
+        return null;
+      }
+      final outputImage = image_util.Image.fromBytes(
+        width: image!.width,
+        height: image!.height,
+        bytes: byteData.buffer,
+        order: image_util.ChannelOrder.rgba,
+      );
+      await outFile.writeAsBytes(image_util.encodeJpg(outputImage));
       isBusy = false;
       update();
       objects.clear();
@@ -118,7 +123,7 @@ class DesignationOnImageState extends GetxController {
   shareImage() async {
     final output = await saveImage();
     if (output != null) {
-      await Share.shareFiles([output]);
+      await Share.shareXFiles([XFile(output)]);
       File(output).delete();
     }
   }
@@ -234,7 +239,7 @@ class DesignationOnImageState extends GetxController {
     if (Platform.isAndroid) {
       final deviceInfo = DeviceInfoPlugin();
       final androidInfo = await deviceInfo.androidInfo;
-      final androidVersion = androidInfo.version.release ?? '5';
+      final androidVersion = androidInfo.version.release;
       return int.parse(androidVersion.split('.')[0]);
     }
     return null;
