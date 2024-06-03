@@ -3,7 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 
 class TextStyleDialog extends StatefulWidget {
-  const TextStyleDialog({Key? key, required this.item}) : super(key: key);
+  const TextStyleDialog({super.key, required this.item});
   final Designation item;
   @override
   State<TextStyleDialog> createState() => _TextStyleDialogState();
@@ -36,13 +36,13 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                   controller: TextEditingController(text: widget.item.text),
                   onChanged: _textChanged,
                   decoration: InputDecoration(
-                      labelText: "Discription:",
+                      labelText: "Description:",
                       suffixIcon: IconButton(
                           onPressed: _confirm, icon: const Icon(Icons.check))),
                 ),
                 Text(
                   "Line weight:",
-                  style: Theme.of(context).textTheme.headline5,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
