@@ -264,8 +264,6 @@ class DesignationOnImageState extends GetxController {
     cursorPosition = position;
   }
 
-  // void showMenuAtPosition() {}
-
   bool isSamePosition(Offset p1, Offset p2) {
     final path = Path();
     path.addOval(Rect.fromCircle(center: p1, radius: 75));
