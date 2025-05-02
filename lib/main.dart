@@ -12,15 +12,15 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     final state = Get.put<DesignationOnImageState>(DesignationOnImageState());
     if (Platform.isLinux) {
-      state.loadImage(File("/home/lavruh/20230802_012556.jpg"));
+      state.loadImage(File("/home/lavruh/tmp/dataonimage/PS\ Main\ Engine.jpg"));
     } else if (Platform.isAndroid) {
-      state.loadImage(File("/storage/emulated/0/DCIM/test.jpg"));
+      state.loadImage(File("/storage/emulated/0/test.jpg"));
     }
     return GetMaterialApp(
         title: 'Flutter Demo',

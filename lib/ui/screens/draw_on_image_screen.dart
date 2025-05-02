@@ -5,16 +5,17 @@ import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/action_button_menu_widget.dart';
 import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
+import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
 class NotesOnImageScreen extends StatelessWidget {
-  const NotesOnImageScreen({Key? key}) : super(key: key);
+  const NotesOnImageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (_) async {
+      onPopInvokedWithResult: (fl, result) async {
         final state = Get.find<DesignationOnImageState>();
         bool leavePage = true;
         await state.hasToSavePromt(
@@ -28,42 +29,57 @@ class NotesOnImageScreen extends StatelessWidget {
           Get.back();
         }
       },
-      child: Scaffold(
-        body: GetBuilder<DesignationOnImageState>(builder: (_) {
-          return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: _.image != null && _.isBusy == false
-                ? Zoom(
-                    initTotalZoomOut: true,
-                    maxZoomHeight: _.image!.height.toDouble(),
-                    maxZoomWidth: _.image!.width.toDouble(),
-                    child: RawGestureDetector(
-                        gestures: <Type, GestureRecognizerFactory>{
-                          CustomPanGestureRecognizer:
-                              GestureRecognizerFactoryWithHandlers<
-                                  CustomPanGestureRecognizer>(
-                            () => CustomPanGestureRecognizer(
-                              onPanDown: (Offset details) {
-                                _.tapHandler(details);
-                                return _.isDrawing;
-                              },
-                              onPanUpdate: (details) {
-                                _.updatePoint(details.localPosition);
-                              },
-                            ),
-                            (CustomPanGestureRecognizer instance) {},
-                          ),
+      child: Stack(
+        alignment: AlignmentDirectional.bottomCenter,
+        children: [
+          Scaffold(
+            body: GetBuilder<DesignationOnImageState>(builder: (state) {
+              Widget child = const Center(child: CircularProgressIndicator());
+
+              if (state.image != null && state.isBusy == false) {
+                final imagePainter = CustomPaint(
+                  painter: ImagePainter(),
+                  child: Container(),
+                );
+
+                Widget eventHandler = RawGestureDetector(
+                  gestures: <Type, GestureRecognizerFactory>{
+                    CustomPanGestureRecognizer:
+                        GestureRecognizerFactoryWithHandlers<
+                            CustomPanGestureRecognizer>(
+                      () => CustomPanGestureRecognizer(
+                        onPanDown: (Offset details) {
+                          state.panDown(details);
+                          return true;
                         },
-                        child: CustomPaint(
-                          painter: ImagePainter(),
-                          child: Container(),
-                        )),
-                  )
-                : const Center(child: CircularProgressIndicator()),
-          );
-        }),
-        floatingActionButton: const ActionButtonMenuWidget(),
+                        onPanUpdate: (details) =>
+                            state.updatePoint(details.localPosition),
+                        onPanEnd: (details) => state.finishDrawing(),
+                      ),
+                      (CustomPanGestureRecognizer instance) {},
+                    ),
+                  },
+                  child: imagePainter,
+                );
+
+                child = Zoom(
+                  initTotalZoomOut: true,
+                  maxZoomHeight: state.image!.height.toDouble(),
+                  maxZoomWidth: state.image!.width.toDouble(),
+                  child: eventHandler,
+                );
+              }
+
+              return SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: child,
+              );
+            }),
+            floatingActionButton: const ActionButtonMenuWidget(),
+          ),
+          DesignationsPanelWidget(),
+        ],
       ),
     );
   }
@@ -81,6 +97,7 @@ class ImagePainter extends CustomPainter {
     for (Designation o in _state.objects.values) {
       o.draw(canvas);
     }
+    _state.objToEdit?.draw(canvas);
     _state.imageSize = size;
   }
 
@@ -91,7 +108,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   bool? hitTest(Offset position) {
-    _state.initUpdateDesignitionAtPosition(position);
-    return _state.isDrawing;
+    _state.updateCursorPosition(position);
+    return _state.isPressed || _state.isNewObj || _state.isObjTouched(position);
   }
 }

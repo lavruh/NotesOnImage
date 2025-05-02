@@ -6,16 +6,12 @@ import 'package:notes_on_image/domain/entities/designation.dart';
 class Note extends Designation {
   late Offset lineEnd;
   Note({
-    required Offset start,
-    required Offset end,
-    required String text,
-    Paint? lineStyle,
-  }) : super(
-          text: text,
-          lineStyle: lineStyle,
-          start: start,
-          end: end,
-        );
+    required super.start,
+    required super.end,
+    required super.text,
+    super.lineStyle,
+    super.highLightedPoint,
+  });
 
   Note.empty()
       : super(
@@ -26,6 +22,7 @@ class Note extends Designation {
 
   @override
   draw(Canvas canvas) {
+    super.draw(canvas);
     final fi = getDirection(start, end);
     final tp = drawText();
     final textCenter = (fi >= 0) & (fi < pi)
@@ -44,5 +41,23 @@ class Note extends Designation {
     );
     canvas.drawLine(start, end, paint);
     drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
+  }
+
+  @override
+  Designation copyWith({
+    int? id,
+    String? text,
+    Offset? start,
+    Offset? end,
+    Paint? lineStyle,
+    int? highLightedPoint,
+  }) {
+    return Note(
+      start: start ?? this.start,
+      end: end ?? this.end,
+      text: text ?? this.text,
+      lineStyle: lineStyle,
+      highLightedPoint: highLightedPoint,
+    );
   }
 }

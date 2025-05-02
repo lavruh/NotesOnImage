@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SaveConfirmDialog extends StatelessWidget {
-  const SaveConfirmDialog({Key? key}) : super(key: key);
+  const SaveConfirmDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,6 +10,8 @@ abstract class Designation {
   Offset start;
   Offset end;
   Offset textPosition = const Offset(0, 0);
+  final intersectionRadius = 75.0;
+  int? highLightedPoint;
 
   Designation({
     int? id,
@@ -17,6 +19,7 @@ abstract class Designation {
     Paint? lineStyle,
     this.start = const Offset(0, 0),
     this.end = const Offset(0, 0),
+    this.highLightedPoint,
   }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
     if (lineStyle != null) {
       paint = Paint()
@@ -41,23 +44,37 @@ abstract class Designation {
     if (p2 != null) end = p2;
   }
 
-  draw(Canvas canvas);
+  draw(Canvas canvas) {
+    if (highLightedPoint == null) return;
+    late final Offset point;
+    if (highLightedPoint == 1) point = start;
+    if (highLightedPoint == 2) point = end;
+    if (highLightedPoint == 3) return;
+
+    final color = paint.color;
+    final p = Paint()..color = color.withAlpha(75);
+    final path = Path();
+    path.addOval(Rect.fromCircle(center: point, radius: intersectionRadius));
+    path.close();
+    canvas.drawPath(path, p);
+  }
 
   int isTouched(Offset point) {
     final path = Path();
-    path.addOval(Rect.fromCircle(center: start, radius: 75));
+    path.addOval(Rect.fromCircle(center: start, radius: intersectionRadius));
     path.close();
     if (path.contains(point)) {
       return 1;
     }
     final path2 = Path();
-    path2.addOval(Rect.fromCircle(center: end, radius: 75));
+    path2.addOval(Rect.fromCircle(center: end, radius: intersectionRadius));
     path2.close();
     if (path2.contains(point)) {
       return 2;
     }
     final pathText = Path();
-    pathText.addOval(Rect.fromCircle(center: textPosition, radius: 75));
+    pathText.addOval(
+        Rect.fromCircle(center: textPosition, radius: intersectionRadius * 2));
     pathText.close();
     if (pathText.contains(point)) {
       return 3;
@@ -142,4 +159,40 @@ abstract class Designation {
   Offset midPoint({required Offset p1, required Offset p2}) {
     return Offset(p1.dx - p2.dx, p1.dy - p2.dy);
   }
+
+  Function(Offset)? getUpdateCallBackIfTouchedAndHighlightIt(
+    Offset point,
+    Function openEditor,
+  ) {
+    final pointSelected = isTouched(point);
+    if (pointSelected == 1) {
+      highLightedPoint = 1;
+      return (Offset p) {
+        return start = p;
+      };
+    }
+    if (pointSelected == 2) {
+      highLightedPoint = 2;
+      return (Offset p) {
+        return end = p;
+      };
+    }
+    if (pointSelected == 3) {
+      highLightedPoint = 3;
+      openEditor();
+      return (p) {};
+    }
+    return null;
+  }
+
+  Designation copyWith({
+    int? id,
+    String? text,
+    Offset? start,
+    Offset? end,
+    Paint? lineStyle,
+    int? highLightedPoint,
+  });
+
+  resetHighlight() => highLightedPoint = null;
 }

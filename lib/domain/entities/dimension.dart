@@ -5,16 +5,12 @@ import 'package:notes_on_image/domain/entities/designation.dart';
 
 class Dimension extends Designation {
   Dimension({
-    required String text,
-    required Offset start,
-    required Offset end,
-    Paint? lineStyle,
-  }) : super(
-          text: text,
-          lineStyle: lineStyle,
-          start: start,
-          end: end,
-        );
+    required super.text,
+    required super.start,
+    required super.end,
+    super.lineStyle,
+    super.highLightedPoint,
+  });
 
   Dimension.empty()
       : super(
@@ -25,6 +21,7 @@ class Dimension extends Designation {
 
   @override
   draw(Canvas canvas) {
+    super.draw(canvas);
     canvas.drawLine(start, end, paint);
     double fi = getDirection(start, end);
     textPosition = start + (end - start) / 2;
@@ -42,5 +39,22 @@ class Dimension extends Designation {
         ));
     canvas.translate(-start.dx, -start.dy);
     canvas.restore();
+  }
+
+  @override
+  Designation copyWith({
+    int? id,
+    String? text,
+    Offset? start,
+    Offset? end,
+    Paint? lineStyle,
+    int? highLightedPoint,
+  }) {
+    return Dimension(
+      text: text ?? this.text,
+      start: start ?? this.start,
+      end: end ?? this.end,
+      lineStyle: lineStyle,
+    );
   }
 }

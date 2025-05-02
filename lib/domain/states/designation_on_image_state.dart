@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:device_info_plus/device_info_plus.dart';
@@ -18,9 +19,11 @@ enum DesignationMode { dimension, note }
 class DesignationOnImageState extends GetxController {
   Map<int, Designation> objects = {};
   List<int> objectsSequence = [];
-  bool isDrawing = false;
+  bool isNewObj = false;
   bool isBusy = false;
-  Designation? _tmpItem;
+  bool isPressed = false;
+  Designation? objToEdit;
+  Offset cursorPosition = Offset(0, 0);
 
   Function(Offset)? objUpdateCallback;
 
@@ -66,34 +69,31 @@ class DesignationOnImageState extends GetxController {
   Future<String?> saveImage() async {
     isBusy = true;
     update();
-    if (image != null) {
-      final rec = ui.PictureRecorder();
-      final canvas = Canvas(rec);
-      final painter = ImagePainter();
-      painter.paint(canvas, imageSize);
-      final picture = rec.endRecording();
-      final im = await picture.toImage(image!.width, image!.height);
-      final outFile =
-          File(path.join(_sourcePath, "${_fileName}_${generateNamePrefix()}$_fileExtension"));
-      final byteData =
-          await im.toByteData(format: ui.ImageByteFormat.rawRgba);
-      if (byteData == null) {
-        return null;
-      }
-      final outputImage = image_util.Image.fromBytes(
-        width: image!.width,
-        height: image!.height,
-        bytes: byteData.buffer,
-        order: image_util.ChannelOrder.rgba,
-      );
-      await outFile.writeAsBytes(image_util.encodeJpg(outputImage));
-      isBusy = false;
-      update();
-      objects.clear();
-      objectsSequence.clear();
-      return outFile.path;
+    if (image == null) return null;
+    final rec = ui.PictureRecorder();
+    final canvas = Canvas(rec);
+    final painter = ImagePainter();
+    painter.paint(canvas, imageSize);
+    final picture = rec.endRecording();
+    final im = await picture.toImage(image!.width, image!.height);
+    final outFile = File(path.join(
+        _sourcePath, "${_fileName}_${generateNamePrefix()}$_fileExtension"));
+    final byteData = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
+    if (byteData == null) {
+      return null;
     }
-    return null;
+    final outputImage = image_util.Image.fromBytes(
+      width: image!.width,
+      height: image!.height,
+      bytes: byteData.buffer,
+      order: image_util.ChannelOrder.rgba,
+    );
+    await outFile.writeAsBytes(image_util.encodeJpg(outputImage));
+    isBusy = false;
+    update();
+    objects.clear();
+    objectsSequence.clear();
+    return outFile.path;
   }
 
   hasToSavePromt({
@@ -141,31 +141,42 @@ class DesignationOnImageState extends GetxController {
   }
 
   initAddDesignation(Designation item) async {
-    _tmpItem = await Get.dialog<Designation>(TextStyleDialog(
+    final i = await Get.dialog<Designation>(TextStyleDialog(
       item: item,
     ));
-    if (_tmpItem != null) {
-      isDrawing = true;
+    if (i != null) {
+      isNewObj = true;
+      objToEdit = i;
     }
   }
 
-  tapHandler(Offset pos) {
-    if (isDrawing && _tmpItem != null) {
-      final Designation designation = _tmpItem!;
-      designation.start = pos;
-      designation.end = pos;
-      objects.putIfAbsent(designation.id, (() => designation));
-      objectsSequence.add(designation.id);
+  panDown(Offset pos) {
+    isPressed = true;
+    final item = objToEdit;
+    if (isNewObj && item != null) {
+      item.start = pos;
+      item.end = pos;
       objUpdateCallback = ((val) {
-        objects[designation.id]!.updateOffsets(p2: val);
+        objToEdit?.updateOffsets(p2: val);
       });
-      _tmpItem = null;
-      update();
+    } else {
+      Timer(Duration(milliseconds: 500), () {
+        initUpdateDesignationAtPosition(pos);
+      });
     }
+    update();
+  }
+
+  updateObjectInState(Designation obj) {
+    final id = obj.id;
+    obj.resetHighlight();
+    objects[id] = obj;
+    objectsSequence.removeWhere((objId) => objId == id);
+    objectsSequence.add(id);
+    update();
   }
 
   updatePoint(Offset pos) {
-    isDrawing = false;
     if (objUpdateCallback != null) {
       objUpdateCallback!(pos);
     }
@@ -182,26 +193,20 @@ class DesignationOnImageState extends GetxController {
     }
   }
 
-  initUpdateDesignitionAtPosition(Offset position) {
-    for (Designation o in objects.values) {
-      final pointIndex = o.isTouched(position);
-      if (pointIndex == 1) {
-        objUpdateCallback = (val) {
-          objects[o.id]!.updateOffsets(p1: val);
-        };
-        isDrawing = true;
-        break;
-      }
-      if (pointIndex == 2) {
-        objUpdateCallback = (val) {
-          objects[o.id]!.updateOffsets(p2: val);
-        };
-        isDrawing = true;
-        break;
-      }
-      if (pointIndex == 3) {
-        updateDesignationStyle(o);
-        break;
+  initUpdateDesignationAtPosition(Offset position) {
+    final cp = cursorPosition;
+    if (isSamePosition(position, cp)) {
+      for (Designation o in objects.values) {
+        final callback =
+            o.getUpdateCallBackIfTouchedAndHighlightIt(position, () {
+          updateDesignationStyle(o);
+        });
+        if (callback != null) {
+          update();
+          objToEdit = o;
+          objUpdateCallback = callback;
+          break;
+        }
       }
     }
   }
@@ -243,5 +248,36 @@ class DesignationOnImageState extends GetxController {
       return int.parse(androidVersion.split('.')[0]);
     }
     return null;
+  }
+
+  void finishDrawing() {
+    final item = objToEdit;
+    if (item != null) updateObjectInState(item);
+    isNewObj = false;
+    objUpdateCallback = null;
+    objToEdit = null;
+    isPressed = false;
+    update();
+  }
+
+  void updateCursorPosition(Offset position) {
+    cursorPosition = position;
+  }
+
+  // void showMenuAtPosition() {}
+
+  bool isSamePosition(Offset p1, Offset p2) {
+    final path = Path();
+    path.addOval(Rect.fromCircle(center: p1, radius: 75));
+    path.close();
+    if (path.contains(p2)) return true;
+    return false;
+  }
+
+  bool isObjTouched(Offset point) {
+    for (Designation o in objects.values) {
+      if (o.isTouched(point) != 0) return true;
+    }
+    return false;
   }
 }

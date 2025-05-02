@@ -1,5 +1,5 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
-import 'package:test/test.dart';
 
 main() {
   final state = DesignationOnImageState();

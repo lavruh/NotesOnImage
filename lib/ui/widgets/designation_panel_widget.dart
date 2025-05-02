@@ -5,44 +5,37 @@ import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 
 class DesignationsPanelWidget extends StatelessWidget {
-  final _state = Get.find<DesignationOnImageState>();
-
-  DesignationsPanelWidget({Key? key}) : super(key: key);
+  const DesignationsPanelWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 60,
-      width: MediaQuery.of(context).size.width,
-      child: Card(
-        color: Colors.grey,
-        child: Wrap(
-          alignment: WrapAlignment.spaceAround,
-          runAlignment: WrapAlignment.center,
+    return GetBuilder<DesignationOnImageState>(builder: (state) {
+      return Card(
+        color: Colors.white24,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+                tooltip: "Undo",
                 onPressed: () {
-                  _state.saveImage();
-                },
-                icon: const Icon(Icons.save)),
-            IconButton(
-                onPressed: () {
-                  _state.undo();
+                  state.undo();
                 },
                 icon: const Icon(Icons.undo)),
             IconButton(
+                tooltip: "Note",
                 onPressed: () {
-                  _state.initAddDesignation(Note.empty());
+                  state.initAddDesignation(Note.empty());
                 },
                 icon: const Icon(Icons.arrow_right_alt)),
             IconButton(
+                tooltip: "Dimension",
                 onPressed: () {
-                  _state.initAddDesignation(Dimension.empty());
+                  state.initAddDesignation(Dimension.empty());
                 },
                 icon: const Icon(Icons.open_in_full)),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
