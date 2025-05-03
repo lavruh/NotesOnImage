@@ -1,25 +1,22 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:notes_on_image/domain/entities/point.dart';
 
 abstract class Designation {
   final int _id;
   String text = '';
   late Paint paint;
   double scale = 2;
-  Offset start;
-  Offset end;
-  Offset textPosition = const Offset(0, 0);
+  Map<String, Point> points = {};
   final intersectionRadius = 75.0;
-  int? highLightedPoint;
 
   Designation({
     int? id,
     this.text = '',
     Paint? lineStyle,
-    this.start = const Offset(0, 0),
-    this.end = const Offset(0, 0),
-    this.highLightedPoint,
+    Offset? start,
+    Offset? end,
   }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
     if (lineStyle != null) {
       paint = Paint()
@@ -31,6 +28,10 @@ abstract class Designation {
         ..strokeWidth = 8.0;
     }
     scale = 0.14 * paint.strokeWidth;
+    points['textPosition'] =
+        Point(name: 'textPosition', position: Offset(0, 0));
+    points['start'] = Point(name: 'start', position: start ?? Offset(0, 0));
+    points['end'] = Point(name: 'end', position: end ?? Offset(0, 0));
   }
 
   int get id => _id;
@@ -39,47 +40,39 @@ abstract class Designation {
   Color get lineColor => paint.color;
   set lineColor(Color val) => paint.color = val;
 
+  Point get startPoint => points['start']!;
+  set startPoint(Point val) => points['start'] = val;
+  Offset get start => startPoint.position;
+  set start(Offset val) => startPoint = Point(name: "start", position: val);
+
+  Point get endPoint => points['end']!;
+  set endPoint(Point val) => points['end'] = val;
+  Offset get end => endPoint.position;
+  set end(Offset val) => endPoint = Point(name: "end", position: val);
+
+  Point get textPositionPoint => points['textPosition']!;
+  set textPositionPoint(Point val) => points['textPosition'] = val;
+  Offset get textPosition => textPositionPoint.position;
+  set textPosition(Offset val) =>
+      textPositionPoint = Point(name: "textPosition", position: val);
+
   updateOffsets({Offset? p1, Offset? p2}) {
     if (p1 != null) start = p1;
     if (p2 != null) end = p2;
   }
 
   draw(Canvas canvas) {
-    if (highLightedPoint == null) return;
-    late final Offset point;
-    if (highLightedPoint == 1) point = start;
-    if (highLightedPoint == 2) point = end;
-    if (highLightedPoint == 3) return;
-
-    final color = paint.color;
-    final p = Paint()..color = color.withAlpha(75);
-    final path = Path();
-    path.addOval(Rect.fromCircle(center: point, radius: intersectionRadius));
-    path.close();
-    canvas.drawPath(path, p);
+    for (final p in points.values) {
+      p.draw(canvas, paint);
+    }
   }
 
-  int isTouched(Offset point) {
-    final path = Path();
-    path.addOval(Rect.fromCircle(center: start, radius: intersectionRadius));
-    path.close();
-    if (path.contains(point)) {
-      return 1;
+  bool isTouched(Offset point) {
+    for (final p in points.values) {
+      final flag = p.isTouched(point);
+      if (flag) return true;
     }
-    final path2 = Path();
-    path2.addOval(Rect.fromCircle(center: end, radius: intersectionRadius));
-    path2.close();
-    if (path2.contains(point)) {
-      return 2;
-    }
-    final pathText = Path();
-    pathText.addOval(
-        Rect.fromCircle(center: textPosition, radius: intersectionRadius * 2));
-    pathText.close();
-    if (pathText.contains(point)) {
-      return 3;
-    }
-    return 0;
+    return false;
   }
 
   TextPainter drawText() {
@@ -164,23 +157,18 @@ abstract class Designation {
     Offset point,
     Function openEditor,
   ) {
-    final pointSelected = isTouched(point);
-    if (pointSelected == 1) {
-      highLightedPoint = 1;
-      return (Offset p) {
-        return start = p;
-      };
-    }
-    if (pointSelected == 2) {
-      highLightedPoint = 2;
-      return (Offset p) {
-        return end = p;
-      };
-    }
-    if (pointSelected == 3) {
-      highLightedPoint = 3;
-      openEditor();
-      return (p) {};
+    for (final p in points.values) {
+      if (p.isTouched(point)) {
+        if (p.name == textPositionPoint.name) {
+          openEditor();
+          return (p) {};
+        }
+
+        points[p.name] = p.copyWith(isHighlighted: true);
+        return (Offset val) {
+          return points[p.name] = p.copyWith(position: val, isHighlighted: true);
+        };
+      }
     }
     return null;
   }
@@ -194,5 +182,9 @@ abstract class Designation {
     int? highLightedPoint,
   });
 
-  resetHighlight() => highLightedPoint = null;
+  resetHighlight() {
+    for (final p in points.values) {
+      points[p.name] = p.copyWith(isHighlighted: false);
+    }
+  }
 }

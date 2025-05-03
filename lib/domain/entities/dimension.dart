@@ -9,7 +9,6 @@ class Dimension extends Designation {
     required super.start,
     required super.end,
     super.lineStyle,
-    super.highLightedPoint,
   });
 
   Dimension.empty()

@@ -14,7 +14,6 @@ import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
-enum DesignationMode { dimension, note }
 
 class DesignationOnImageState extends GetxController {
   Map<int, Designation> objects = {};
@@ -274,7 +273,7 @@ class DesignationOnImageState extends GetxController {
 
   bool isObjTouched(Offset point) {
     for (Designation o in objects.values) {
-      if (o.isTouched(point) != 0) return true;
+      if (o.isTouched(point)) return true;
     }
     return false;
   }

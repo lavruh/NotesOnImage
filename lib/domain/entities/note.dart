@@ -10,7 +10,6 @@ class Note extends Designation {
     required super.end,
     required super.text,
     super.lineStyle,
-    super.highLightedPoint,
   });
 
   Note.empty()
@@ -57,7 +56,6 @@ class Note extends Designation {
       end: end ?? this.end,
       text: text ?? this.text,
       lineStyle: lineStyle,
-      highLightedPoint: highLightedPoint,
     );
   }
 }
