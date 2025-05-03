@@ -47,7 +47,7 @@ abstract class Point {
     canvas.drawPath(path, p);
   }
 
-  draw(Canvas canvas, Paint paint, double symbolDirection) {
+  draw(Canvas canvas, Paint paint, double symbolDirection, double scale) {
     if (isHighlighted) highLight(canvas, paint);
   }
 }

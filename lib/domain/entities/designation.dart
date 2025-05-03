@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/point.dart';
 import 'package:notes_on_image/domain/entities/point_empty.dart';
@@ -6,7 +8,6 @@ abstract class Designation {
   final int _id;
   String text = '';
   late Paint paint;
-  double scale = 2;
   Map<String, Point> points = {};
   final intersectionRadius = 75.0;
 
@@ -26,7 +27,6 @@ abstract class Designation {
         ..color = Colors.lightGreenAccent
         ..strokeWidth = 8.0;
     }
-    scale = 0.14 * paint.strokeWidth;
     points['textPosition'] =
         PointEmpty(name: 'textPosition', position: Offset(0, 0));
     points['start'] = start?.copyWith(name: "start") ??
@@ -40,6 +40,8 @@ abstract class Designation {
   set lineWeight(double val) => paint.strokeWidth = val;
   Color get lineColor => paint.color;
   set lineColor(Color val) => paint.color = val;
+
+  double get textOffset => -50 - log(lineWeight) * 10 - lineWeight;
 
   Point get startPoint => points['start']!;
   set startPoint(Point val) => points['start'] = val;
@@ -77,7 +79,7 @@ abstract class Designation {
         text: text,
         style: TextStyle(
           color: paint.color,
-          fontSize: paint.strokeWidth + 60,
+          fontSize: lineWeight * 2 + 30,
         ));
     TextPainter tp = TextPainter(
       text: ts,

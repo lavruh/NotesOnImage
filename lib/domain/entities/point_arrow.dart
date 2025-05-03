@@ -11,13 +11,15 @@ class PointArrow extends Point {
     required Canvas canvas,
     required Paint paint,
     required double direction,
+    required double scale,
   }) {
-    final arrowAng = -45;
+    final arrowAng = -25;
     canvas.drawLine(
       position,
       rotatePoint(
           origin: position,
-          point: Offset(position.dx + arrowAng, position.dy - (arrowAng) / 3),
+          point: Offset(position.dx - scale * 4 + arrowAng,
+              position.dy + scale * 0.1 - (arrowAng) / 3),
           a: direction),
       paint,
     );
@@ -25,19 +27,22 @@ class PointArrow extends Point {
       position,
       rotatePoint(
           origin: position,
-          point: Offset(position.dx + arrowAng, position.dy + (arrowAng) / 3),
+          point: Offset(position.dx - scale * 4 + arrowAng,
+              position.dy - scale * 0.1 + (arrowAng) / 3),
           a: direction),
       paint,
     );
   }
 
   @override
-  draw(Canvas canvas, Paint paint, double symbolDirection) {
-    super.draw(canvas, paint, symbolDirection);
+  draw(Canvas canvas, Paint paint, double symbolDirection, double scale) {
+    super.draw(canvas, paint, symbolDirection, scale);
     drawArrow(
-        canvas: canvas,
-        paint: paint,
-        direction: symbolDirection);
+      canvas: canvas,
+      paint: paint,
+      direction: symbolDirection,
+      scale: scale,
+    );
   }
 
   @override

@@ -27,12 +27,12 @@ class Note extends Designation {
   draw(Canvas canvas) {
     double direction = getDirection(start, end);
     for(final poi in points.values) {
-      poi.draw(canvas, paint, direction);
+      poi.draw(canvas, paint, direction, lineWeight);
     }
     final tp = drawText();
     final textCenter = (direction >= 0) & (direction < pi)
-        ? end - Offset(tp.width / 2, (tp.height + 100) / 2)
-        : end - Offset(tp.width / 2, (tp.height - 100) / 2);
+        ? end - Offset(tp.width / 2, (tp.height - textOffset) / 2)
+        : end - Offset(tp.width / 2, (tp.height + textOffset) / 2);
     textPosition = textCenter + Offset(tp.width / 2, tp.height / 2);
     lineEnd = rotatePoint(
       origin: textCenter,

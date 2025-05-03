@@ -29,18 +29,14 @@ class Dimension extends Designation {
     for (final poi in points.values) {
       double d = direction;
       if (poi.name == "end") d = direction + pi;
-      poi.draw(canvas, paint, d);
+      poi.draw(canvas, paint, d, lineWeight);
     }
     canvas.save();
     canvas.translate(start.dx, start.dy);
     canvas.rotate(direction + pi);
     TextPainter tp = drawText();
-    tp.paint(
-        canvas,
-        Offset(
-          vectorLen(p1: start, p2: end) / 2 - tp.width / 2,
-          -100,
-        ));
+    tp.paint(canvas,
+        Offset(vectorLen(p1: start, p2: end) / 2 - tp.width / 2, textOffset));
     canvas.translate(-start.dx, -start.dy);
     canvas.restore();
   }
