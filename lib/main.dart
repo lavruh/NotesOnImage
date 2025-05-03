@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = Get.put<DesignationOnImageState>(DesignationOnImageState());
     if (Platform.isLinux) {
-      state.loadImage(File("/home/lavruh/tmp/dataonimage/PS\ Main\ Engine.jpg"));
+      state.loadImage(File("/home/lavruh/tmp/dataonimage/PS Main Engine.jpg"));
     } else if (Platform.isAndroid) {
       state.loadImage(File("/storage/emulated/0/test.jpg"));
     }
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Screen1 extends StatelessWidget {
-  const Screen1({Key? key}) : super(key: key);
+  const Screen1({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +56,11 @@ class Screen1 extends StatelessWidget {
 }
 
 class Screen2 extends StatelessWidget {
-  const Screen2({Key? key}) : super(key: key);
+  const Screen2({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(),
       body: const NotesOnImageScreen(),
     );
   }

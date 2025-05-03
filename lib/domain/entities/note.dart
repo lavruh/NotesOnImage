@@ -2,6 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
+import 'package:notes_on_image/domain/entities/point.dart';
+import 'package:notes_on_image/domain/entities/point_arrow.dart';
+import 'package:notes_on_image/domain/entities/point_empty.dart';
+import 'package:notes_on_image/utils/math_utils.dart';
 
 class Note extends Designation {
   late Offset lineEnd;
@@ -15,23 +19,25 @@ class Note extends Designation {
   Note.empty()
       : super(
           text: '',
-          start: const Offset(0, 0),
-          end: const Offset(0, 0),
+          start: PointArrow(name: "start", position: Offset(0, 0)),
+          end: PointEmpty(name: "end", position: Offset(0, 0)),
         );
 
   @override
   draw(Canvas canvas) {
-    super.draw(canvas);
-    final fi = getDirection(start, end);
+    double direction = getDirection(start, end);
+    for(final poi in points.values) {
+      poi.draw(canvas, paint, direction);
+    }
     final tp = drawText();
-    final textCenter = (fi >= 0) & (fi < pi)
+    final textCenter = (direction >= 0) & (direction < pi)
         ? end - Offset(tp.width / 2, (tp.height + 100) / 2)
         : end - Offset(tp.width / 2, (tp.height - 100) / 2);
     textPosition = textCenter + Offset(tp.width / 2, tp.height / 2);
     lineEnd = rotatePoint(
       origin: textCenter,
       point: textCenter + Offset(-(tp.width + 5 / 2), 0),
-      a: fi + pi,
+      a: direction + pi,
     );
 
     tp.paint(
@@ -39,21 +45,20 @@ class Note extends Designation {
       textCenter,
     );
     canvas.drawLine(start, end, paint);
-    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
   }
 
   @override
   Designation copyWith({
     int? id,
     String? text,
-    Offset? start,
-    Offset? end,
+    Point? start,
+    Point? end,
     Paint? lineStyle,
     int? highLightedPoint,
   }) {
     return Note(
-      start: start ?? this.start,
-      end: end ?? this.end,
+      start: start ?? startPoint,
+      end: end ?? endPoint,
       text: text ?? this.text,
       lineStyle: lineStyle,
     );

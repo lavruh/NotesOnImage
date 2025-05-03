@@ -1,19 +1,14 @@
 import 'dart:ui';
 
-class Point {
+abstract class Point {
   final String name;
   final Offset position;
   final double intersectionRadius;
   final bool isHighlighted;
 
-  Point({required this.name, required this.position})
-      : intersectionRadius = 75.0,
-        isHighlighted = false;
-  Point._(
-      {required this.name,
-      required this.position,
-      required this.isHighlighted,
-      required this.intersectionRadius});
+  Point(
+      {required this.name, required this.position, this.isHighlighted = false})
+      : intersectionRadius = 75.0;
 
   bool isTouched(Offset point) {
     final path = Path();
@@ -30,12 +25,7 @@ class Point {
     String? name,
     bool? isHighlighted,
     double? intersectionRadius,
-  }) =>
-      Point._(
-          name: name ?? this.name,
-          position: position ?? this.position,
-          isHighlighted: isHighlighted ?? this.isHighlighted,
-          intersectionRadius: intersectionRadius ?? this.intersectionRadius);
+  });
 
   @override
   bool operator ==(Object other) =>
@@ -57,7 +47,7 @@ class Point {
     canvas.drawPath(path, p);
   }
 
-  draw(Canvas canvas, Paint paint) {
+  draw(Canvas canvas, Paint paint, double symbolDirection) {
     if (isHighlighted) highLight(canvas, paint);
   }
 }

@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
+import 'package:notes_on_image/domain/entities/point.dart';
+import 'package:notes_on_image/domain/entities/point_arrow.dart';
+import 'package:notes_on_image/utils/math_utils.dart';
 
 class Dimension extends Designation {
   Dimension({
@@ -14,21 +17,23 @@ class Dimension extends Designation {
   Dimension.empty()
       : super(
           text: '',
-          start: const Offset(0, 0),
-          end: const Offset(0, 0),
+          start: PointArrow(name: "start", position: Offset(0, 0)),
+          end: PointArrow(name: "end", position: Offset(0, 0)),
         );
 
   @override
   draw(Canvas canvas) {
-    super.draw(canvas);
     canvas.drawLine(start, end, paint);
-    double fi = getDirection(start, end);
+    double direction = getDirection(start, end);
     textPosition = start + (end - start) / 2;
-    drawArrow(canvas: canvas, p1: start, p2: end, arrowAng: -45, fi: fi);
-    drawArrow(canvas: canvas, p1: end, p2: start, arrowAng: 45, fi: fi);
+    for (final poi in points.values) {
+      double d = direction;
+      if (poi.name == "end") d = direction + pi;
+      poi.draw(canvas, paint, d);
+    }
     canvas.save();
     canvas.translate(start.dx, start.dy);
-    canvas.rotate(fi + pi);
+    canvas.rotate(direction + pi);
     TextPainter tp = drawText();
     tp.paint(
         canvas,
@@ -44,15 +49,15 @@ class Dimension extends Designation {
   Designation copyWith({
     int? id,
     String? text,
-    Offset? start,
-    Offset? end,
+    Point? start,
+    Point? end,
     Paint? lineStyle,
     int? highLightedPoint,
   }) {
     return Dimension(
       text: text ?? this.text,
-      start: start ?? this.start,
-      end: end ?? this.end,
+      start: start ?? startPoint,
+      end: end ?? endPoint,
       lineStyle: lineStyle,
     );
   }

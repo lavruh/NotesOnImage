@@ -6,7 +6,7 @@ import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:simple_speed_dial/simple_speed_dial.dart';
 
 class ActionButtonMenuWidget extends StatelessWidget {
-  const ActionButtonMenuWidget({Key? key}) : super(key: key);
+  const ActionButtonMenuWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
