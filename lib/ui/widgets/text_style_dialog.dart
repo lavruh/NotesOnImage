@@ -10,6 +10,16 @@ class TextStyleDialog extends StatefulWidget {
 }
 
 class _TextStyleDialogState extends State<TextStyleDialog> {
+  late Designation item;
+  final nameController = TextEditingController();
+
+  @override
+  initState() {
+    super.initState();
+    item = widget.item;
+    nameController.text = item.text;
+  }
+
   List<DropdownMenuItem<int>> availableSizes = List.generate(
       10,
       (index) => DropdownMenuItem(
@@ -19,46 +29,56 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final isSmallScreen = w < 600;
     return Dialog(
       shape: const RoundedRectangleBorder(),
       backgroundColor: Colors.transparent,
-      child: SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+            maxHeight: 600, maxWidth: isSmallScreen ? w * 0.9 : 550),
         child: Card(
           elevation: 5,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Wrap(
-              spacing: 5.0,
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                TextField(
-                  controller: TextEditingController(text: widget.item.text),
-                  onChanged: _textChanged,
-                  decoration: InputDecoration(
-                      labelText: "Description:",
-                      suffixIcon: IconButton(
-                          onPressed: _confirm, icon: const Icon(Icons.check))),
+                ListTile(
+                  title: Text("Text:"),
+                  trailing: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isSmallScreen ? w * 0.5 : 400,
+                    ),
+                    child: TextFormField(controller: nameController),
+                  ),
                 ),
-                Text(
-                  "Line weight:",
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DropdownButton(
+                ListTile(
+                  title: Text(
+                    "Line weight:",
+                  ),
+                  trailing: DropdownButton(
                     items: availableSizes,
-                    value: widget.item.lineWeight,
+                    value: item.lineWeight,
                     onChanged: _lineWeightChanged,
                   ),
                 ),
-                SizedBox(
-                  height: 200,
-                  child: MaterialPicker(
-                    pickerColor: widget.item.lineColor,
-                    onColorChanged: _colorChanged,
+                SwitchListTile(
+                    title: Text("Text frame:"),
+                    value: item.drawTextFrame,
+                    onChanged: _setTextFrame),
+                ListTile(title: Text("Color")),
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 300, maxWidth: 200),
+                    child: MaterialPicker(
+                      portraitOnly: true,
+                      pickerColor: item.lineColor,
+                      onColorChanged: _colorChanged,
+                    ),
                   ),
                 ),
+                IconButton(onPressed: _confirm, icon: const Icon(Icons.check)),
               ],
             ),
           ),
@@ -67,20 +87,21 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
     );
   }
 
-  void _textChanged(String val) {
-    widget.item.text = val;
-  }
+  void _lineWeightChanged(num? value) => setState(() {
+        final d = value?.toDouble() ?? 7;
+        item = item.copyWith(lineWeight: d);
+      });
 
-  void _lineWeightChanged(num? value) {
-    widget.item.lineWeight = value?.toDouble() ?? 7;
-    setState(() {});
-  }
+  void _colorChanged(Color value) => setState(() {
+        item = item.copyWith(color: value);
+      });
 
-  void _colorChanged(Color value) {
-    widget.item.lineColor = value;
-  }
+  void _setTextFrame(bool? val) => setState(() {
+        item = item.copyWith(drawTextFrame: val);
+      });
 
   void _confirm() {
-    Navigator.of(context, rootNavigator: true).pop<Designation>(widget.item);
+    final result = item.copyWith(text: nameController.text);
+    Navigator.of(context, rootNavigator: true).pop<Designation>(result);
   }
 }

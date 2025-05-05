@@ -188,8 +188,9 @@ class DesignationOnImageState extends GetxController {
     ));
     if (updatedItem != null && objects.containsKey(updatedItem.id)) {
       objects[updatedItem.id] = updatedItem;
-      update();
+      objToEdit = null;
     }
+    update();
   }
 
   initUpdateDesignationAtPosition(Offset position) {

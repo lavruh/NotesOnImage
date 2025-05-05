@@ -10,10 +10,12 @@ import 'package:notes_on_image/utils/math_utils.dart';
 class Note extends Designation {
   late Offset lineEnd;
   Note({
+    super.id,
     required super.start,
     required super.end,
     required super.text,
     super.lineStyle,
+    super.drawTextFrame,
   });
 
   Note.empty()
@@ -26,7 +28,7 @@ class Note extends Designation {
   @override
   draw(Canvas canvas) {
     double direction = getDirection(start, end);
-    for(final poi in points.values) {
+    for (final poi in points.values) {
       poi.draw(canvas, paint, direction, lineWeight);
     }
     final tp = drawText();
@@ -55,12 +57,20 @@ class Note extends Designation {
     Point? end,
     Paint? lineStyle,
     int? highLightedPoint,
+    bool? drawTextFrame,
+    double? lineWeight,
+    Color? color,
   }) {
+    Paint style = lineStyle ?? paint;
+    style.color = color ?? style.color;
+    style.strokeWidth = lineWeight ?? style.strokeWidth;
     return Note(
+      id: id ?? this.id,
       start: start ?? startPoint,
       end: end ?? endPoint,
       text: text ?? this.text,
-      lineStyle: lineStyle,
+      lineStyle: style,
+      drawTextFrame: drawTextFrame ?? this.drawTextFrame,
     );
   }
 }

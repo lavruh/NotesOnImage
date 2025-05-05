@@ -8,10 +8,12 @@ import 'package:notes_on_image/utils/math_utils.dart';
 
 class Dimension extends Designation {
   Dimension({
+    super.id,
     required super.text,
     required super.start,
     required super.end,
     super.lineStyle,
+    super.drawTextFrame,
   });
 
   Dimension.empty()
@@ -49,12 +51,21 @@ class Dimension extends Designation {
     Point? end,
     Paint? lineStyle,
     int? highLightedPoint,
+    bool? drawTextFrame,
+    double? lineWeight,
+    Color? color,
   }) {
+    Paint style = lineStyle ?? paint;
+    style.color = color ?? style.color;
+    style.strokeWidth = lineWeight ?? style.strokeWidth;
     return Dimension(
+      id: id ?? this.id,
       text: text ?? this.text,
       start: start ?? startPoint,
       end: end ?? endPoint,
-      lineStyle: lineStyle,
+      lineStyle: style,
+      drawTextFrame: drawTextFrame ?? this.drawTextFrame,
+
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/point.dart';
 import 'package:notes_on_image/domain/entities/point_empty.dart';
+import 'package:notes_on_image/utils/color_extensions.dart';
 
 abstract class Designation {
   final int _id;
@@ -10,6 +11,7 @@ abstract class Designation {
   late Paint paint;
   Map<String, Point> points = {};
   final intersectionRadius = 75.0;
+  final bool drawTextFrame;
 
   Designation({
     int? id,
@@ -17,6 +19,7 @@ abstract class Designation {
     Paint? lineStyle,
     Point? start,
     Point? end,
+    this.drawTextFrame = false,
   }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
     if (lineStyle != null) {
       paint = Paint()
@@ -75,10 +78,16 @@ abstract class Designation {
   }
 
   TextPainter drawText() {
+    final shadedColor = paint.color.generateBackgroundColor();
+    final color = drawTextFrame ? shadedColor : paint.color;
+    final bg = drawTextFrame ? paint.color : null;
     TextSpan ts = TextSpan(
-        text: text,
+        text: "\u2007$text\u2007",
         style: TextStyle(
-          color: paint.color,
+          color: color,
+          backgroundColor: bg,
+          height: 1.5,
+          leadingDistribution: TextLeadingDistribution.even,
           fontSize: lineWeight * 2 + 30,
         ));
     TextPainter tp = TextPainter(
@@ -118,11 +127,19 @@ abstract class Designation {
     Point? end,
     Paint? lineStyle,
     int? highLightedPoint,
+    bool? drawTextFrame,
+    double? lineWeight,
+    Color? color,
   });
 
   resetHighlight() {
     for (final p in points.values) {
       points[p.name] = p.copyWith(isHighlighted: false);
     }
+  }
+
+  @override
+  String toString() {
+    return "$runtimeType \n text: $text \n start: $start \n end: $end \n";
   }
 }
