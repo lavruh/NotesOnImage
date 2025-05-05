@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:get/get.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
-import 'package:notes_on_image/ui/widgets/action_button_menu_widget.dart';
 import 'package:notes_on_image/ui/widgets/custom_gesture_recognizer.dart';
 import 'package:notes_on_image/ui/widgets/designation_panel_widget.dart';
 import 'package:zoom_widget/zoom_widget.dart';
@@ -76,7 +75,6 @@ class NotesOnImageScreen extends StatelessWidget {
                 child: child,
               );
             }),
-            floatingActionButton: const ActionButtonMenuWidget(),
           ),
           DesignationsPanelWidget(),
         ],

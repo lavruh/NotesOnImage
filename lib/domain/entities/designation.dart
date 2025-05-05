@@ -10,7 +10,6 @@ abstract class Designation {
   String text = '';
   late Paint paint;
   Map<String, Point> points = {};
-  final intersectionRadius = 75.0;
   final bool drawTextFrame;
 
   Designation({
@@ -78,18 +77,7 @@ abstract class Designation {
   }
 
   TextPainter drawText() {
-    final shadedColor = paint.color.generateBackgroundColor();
-    final color = drawTextFrame ? shadedColor : paint.color;
-    final bg = drawTextFrame ? paint.color : null;
-    TextSpan ts = TextSpan(
-        text: "\u2007$text\u2007",
-        style: TextStyle(
-          color: color,
-          backgroundColor: bg,
-          height: 1.5,
-          leadingDistribution: TextLeadingDistribution.even,
-          fontSize: lineWeight * 2 + 30,
-        ));
+    TextSpan ts = TextSpan(text: "\u2007$text\u2007", style: getTextStyle());
     TextPainter tp = TextPainter(
       text: ts,
       textAlign: TextAlign.center,
@@ -97,6 +85,19 @@ abstract class Designation {
     );
     tp.layout();
     return tp;
+  }
+
+  TextStyle getTextStyle() {
+    final shadedColor = paint.color.generateBackgroundColor();
+    final color = drawTextFrame ? shadedColor : paint.color;
+    final bg = drawTextFrame ? paint.color : null;
+    return TextStyle(
+      color: color,
+      backgroundColor: bg,
+      height: 1.5,
+      leadingDistribution: TextLeadingDistribution.even,
+      fontSize: lineWeight * 2 + 30,
+    );
   }
 
   Function(Offset)? getUpdateCallBackIfTouchedAndHighlightIt(

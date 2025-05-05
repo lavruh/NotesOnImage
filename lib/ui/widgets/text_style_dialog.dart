@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
+import 'package:notes_on_image/domain/entities/text_block.dart';
 
 class TextStyleDialog extends StatefulWidget {
   const TextStyleDialog({super.key, required this.item});
@@ -44,13 +45,14 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ListTile(
-                  title: Text("Text:"),
-                  trailing: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isSmallScreen ? w * 0.5 : 400,
-                    ),
-                    child: TextFormField(controller: nameController),
+                ListTile(title: Text("Text:")),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isSmallScreen ? w * 0.5 : 400,
+                  ),
+                  child: TextFormField(
+                    controller: nameController,
+                    maxLines: item is TextBlock ? 3 : 1,
                   ),
                 ),
                 ListTile(

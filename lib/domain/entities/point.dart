@@ -8,7 +8,7 @@ abstract class Point {
 
   Point(
       {required this.name, required this.position, this.isHighlighted = false})
-      : intersectionRadius = 75.0;
+      : intersectionRadius = 40.0;
 
   bool isTouched(Offset point) {
     final path = Path();
