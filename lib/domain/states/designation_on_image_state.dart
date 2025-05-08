@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +14,6 @@ import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:share_plus/share_plus.dart';
-
 
 class DesignationOnImageState extends GetxController {
   Map<int, Designation> objects = {};
@@ -28,22 +28,8 @@ class DesignationOnImageState extends GetxController {
 
   ui.Image? image;
   late Size imageSize;
-  String _sourcePath = '';
-  String _fileName = '';
-  String _fileExtension = '';
-
-  set sourcePath(String p) {
-    final delim = p.lastIndexOf('/');
-    _sourcePath = p.substring(0, delim);
-    final n = p.substring(delim + 1);
-    _fileName = n.substring(0, n.length - 4);
-    _fileExtension = n.substring(n.length - 4);
-  }
-
-  String get sourcePath => path.join(_sourcePath, "$_fileName$_fileExtension");
-  String get pathBase => _sourcePath;
-  String get fileName => _fileName;
-  String get fileExt => _fileExtension;
+  String workDir = "";
+  String originalName = "";
 
   bool isChanged() {
     if (objectsSequence.isNotEmpty) {
@@ -52,34 +38,30 @@ class DesignationOnImageState extends GetxController {
     return false;
   }
 
-  loadImage(File f) async {
-    isBusy = true;
-    update();
-    objects.clear();
-    objectsSequence.clear();
+  _loadImage(File f) async {
     final data = await f.readAsBytes();
     image = await decodeImageFromList(data);
-    sourcePath = f.path;
     imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
     isBusy = false;
     update();
   }
 
-  Future<String?> saveImage() async {
+  Future<File> saveImage({String? outputFilePath}) async {
     isBusy = true;
     update();
-    if (image == null) return null;
+    if (image == null) throw Exception("Image is null");
     final rec = ui.PictureRecorder();
     final canvas = Canvas(rec);
     final painter = ImagePainter();
     painter.paint(canvas, imageSize);
     final picture = rec.endRecording();
     final im = await picture.toImage(image!.width, image!.height);
-    final outFile = File(path.join(
-        _sourcePath, "${_fileName}_${generateNamePrefix()}$_fileExtension"));
+    final name = path.basenameWithoutExtension(originalName);
+    final outFile = File(outputFilePath ??
+        path.join(workDir, "${name}_${generateNamePrefix()}.jpg"));
     final byteData = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
     if (byteData == null) {
-      return null;
+      throw Exception("Cannot encode image to byte data");
     }
     final outputImage = image_util.Image.fromBytes(
       width: image!.width,
@@ -90,12 +72,85 @@ class DesignationOnImageState extends GetxController {
     await outFile.writeAsBytes(image_util.encodeJpg(outputImage));
     isBusy = false;
     update();
-    objects.clear();
-    objectsSequence.clear();
-    return outFile.path;
+    return outFile;
   }
 
-  hasToSavePromt({
+  saveZip({String? outputFilePath}) async {
+    final originalImage = await image?.toByteData();
+    if (originalImage == null) return;
+    final outputImage = image_util.Image.fromBytes(
+      width: image!.width,
+      height: image!.height,
+      bytes: originalImage.buffer,
+      order: image_util.ChannelOrder.rgba,
+    );
+    final data = objects.values.map((field) => field.toMap()).toList();
+    final designationsJsonString = jsonEncode(data);
+    final name = path.basenameWithoutExtension(originalName);
+
+    final zipFilePath = outputFilePath ?? path.join(workDir, "$name.zip");
+    final imgBytes = image_util.encodeJpg(outputImage);
+
+    final archive = Archive()
+      ..addFile(ArchiveFile("$name.jpg", imgBytes.length, imgBytes))
+      ..addFile(ArchiveFile('designationsJsonString.json',
+          designationsJsonString.length, utf8.encode(designationsJsonString)));
+
+    final zipFile = File(zipFilePath);
+    final buffer = ZipEncoder().encode(archive);
+    await zipFile.writeAsBytes(buffer);
+  }
+
+  void open(File file) async {
+    if (!file.existsSync()) return;
+    final extension = path.extension(file.path);
+
+    if (extension != '.zip' && extension != '.jpg') return;
+    isBusy = true;
+    update();
+    objects.clear();
+    objectsSequence.clear();
+    workDir = path.dirname(file.path);
+    originalName = path.basenameWithoutExtension(file.path);
+
+    if (extension == '.zip') await _openZip(file);
+    if (extension == '.jpg') await _loadImage(file);
+
+    isBusy = false;
+    update();
+  }
+
+  _openZip(File file) async {
+    final archiveBytes = await file.readAsBytes();
+    final archive = ZipDecoder().decodeBytes(archiveBytes);
+
+    ArchiveFile? source;
+    ArchiveFile? json;
+
+    for (final file in archive) {
+      if (file.name == 'designationsJsonString.json') {
+        json = file;
+      } else if (path.extension(file.name) == '.jpg') {
+        source = file;
+      }
+    }
+    if (source == null || json == null) {
+      throw Exception("Wrong zip file format: \n source $source\n json $json");
+    }
+
+    final data = source.content;
+    image = await decodeImageFromList(data);
+    imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
+
+    final fieldsJsonString = utf8.decode(json.content as List<int>);
+    final dataMap = jsonDecode(fieldsJsonString);
+    for (final m in dataMap) {
+      final d = Designation.fromMap(m);
+      objects[d.id] = d;
+    }
+  }
+
+  hasToSaveDialog({
     required Function onConfirmCallback,
     Function? onCancelCallback,
     Function? onNoCallback,
@@ -116,14 +171,6 @@ class DesignationOnImageState extends GetxController {
       if (onCancelCallback != null) onCancelCallback();
     } else {
       if (onNoCallback != null) onNoCallback();
-    }
-  }
-
-  shareImage() async {
-    final output = await saveImage();
-    if (output != null) {
-      await Share.shareXFiles([XFile(output)]);
-      File(output).delete();
     }
   }
 
@@ -197,10 +244,8 @@ class DesignationOnImageState extends GetxController {
     final cp = cursorPosition;
     if (isSamePosition(position, cp)) {
       for (Designation o in objects.values) {
-        final callback =
-            o.getUpdateCallBackIfTouchedAndHighlightIt(position, () {
-          updateDesignationStyle(o);
-        });
+        final callback = o.getUpdateCallBackIfTouchedAndHighlightIt(
+            position, () => updateDesignationStyle(o));
         if (callback != null) {
           update();
           objToEdit = o;
@@ -277,5 +322,11 @@ class DesignationOnImageState extends GetxController {
       if (o.isTouched(point)) return true;
     }
     return false;
+  }
+
+  void openPath(String path) {
+    if (path.isEmpty) return;
+    final file = File(path);
+    open(file);
   }
 }

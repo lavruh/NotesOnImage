@@ -17,7 +17,7 @@ class NotesOnImageScreen extends StatelessWidget {
       onPopInvokedWithResult: (fl, result) async {
         final state = Get.find<DesignationOnImageState>();
         bool leavePage = true;
-        await state.hasToSavePromt(
+        await state.hasToSaveDialog(
             onConfirmCallback: () async {
               leavePage = false;
               await state.saveImage();

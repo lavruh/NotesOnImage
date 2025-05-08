@@ -1,8 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:notes_on_image/domain/entities/dimension.dart';
+import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/entities/point.dart';
 import 'package:notes_on_image/domain/entities/point_empty.dart';
+import 'package:notes_on_image/domain/entities/text_block.dart';
 import 'package:notes_on_image/utils/color_extensions.dart';
 
 abstract class Designation {
@@ -127,7 +131,6 @@ abstract class Designation {
     Point? start,
     Point? end,
     Paint? lineStyle,
-    int? highLightedPoint,
     bool? drawTextFrame,
     double? lineWeight,
     Color? color,
@@ -141,6 +144,84 @@ abstract class Designation {
 
   @override
   String toString() {
-    return "$runtimeType \n text: $text \n start: $start \n end: $end \n";
+    return "$runtimeType [$id] \n text: $text \n start: $start \n end: $end \n";
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'runtimeType': runtimeType.toString(),
+      'id': _id,
+      'text': text,
+      'color': paint.color.toHexString(),
+      'strokeWidth': paint.strokeWidth,
+      'points': points.values.map((poi) => poi.toMap()).toList(),
+      'drawTextFrame': drawTextFrame,
+    };
+  }
+
+  factory Designation.fromMap(Map<String, dynamic> map) {
+    final type = map['runtimeType'];
+    if (type == null) {
+      throw Exception("Designation.fromMap: runtimeType is null");
+    }
+
+    final pointsMap = map['points'];
+    if (pointsMap == null) {
+      throw Exception("Designation.fromMap: pointsMap is null");
+    }
+    final Map<String, Point> poi = {};
+    for (final p in pointsMap) {
+      poi[p['name']] = Point.fromMap(p);
+    }
+    if (poi['start'] == null || poi['end'] == null) {
+      throw Exception("Designation.fromMap: start or end is null");
+    }
+    final String c = map['color'];
+
+    if (type == "Note") {
+      return Note.empty().copyWith(
+        id: map['id'],
+        text: map['text'],
+        start: poi['start'],
+        end: poi['end'],
+        lineWeight: map['strokeWidth'],
+        color: c.toColor(),
+        drawTextFrame: map['drawTextFrame'],
+      );
+    }
+    if (type == "Dimension") {
+      return Dimension.empty().copyWith(
+        id: map['id'],
+        text: map['text'],
+        start: poi['start'],
+        end: poi['end'],
+        lineWeight: map['strokeWidth'],
+        color: c.toColor(),
+        drawTextFrame: map['drawTextFrame'],
+      );
+    }
+    if (type == "TextBlock") {
+      return TextBlock.empty().copyWith(
+        id: map['id'],
+        text: map['text'],
+        start: poi['start'],
+        end: poi['end'],
+        lineWeight: map['strokeWidth'],
+        color: c.toColor(),
+        drawTextFrame: map['drawTextFrame'],
+      );
+    }
+    throw Exception("Designation.fromMap: Unknown type: $type");
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Designation &&
+          runtimeType == other.runtimeType &&
+          _id == other._id &&
+          text == other.text;
+
+  @override
+  int get hashCode => _id.hashCode ^ text.hashCode ^ points.hashCode;
 }

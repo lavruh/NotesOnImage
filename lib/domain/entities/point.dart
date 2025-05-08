@@ -1,5 +1,8 @@
 import 'dart:ui';
 
+import 'package:notes_on_image/domain/entities/point_arrow.dart';
+import 'package:notes_on_image/domain/entities/point_empty.dart';
+
 abstract class Point {
   final String name;
   final Offset position;
@@ -49,5 +52,37 @@ abstract class Point {
 
   draw(Canvas canvas, Paint paint, double symbolDirection, double scale) {
     if (isHighlighted) highLight(canvas, paint);
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'runtimeType': runtimeType.toString(),
+      'name': name,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'intersectionRadius': intersectionRadius,
+    };
+  }
+
+  factory Point.fromMap(Map map) {
+    final type = map['runtimeType'];
+    if (type == null) throw Exception("Point fromMap: runtimeType is null");
+
+    final pos = map['position'] as Map<String, dynamic>;
+    final x = double.parse(pos['dx'].toString());
+    final y = double.parse(pos['dy'].toString());
+
+    if (type == "PointArrow") {
+      return PointArrow(
+        name: map['name'],
+        position: Offset(x, y),
+      ).copyWith(intersectionRadius: map['intersectionRadius'] as double);
+    }
+    if (type == "PointEmpty") {
+      return PointEmpty(
+        name: map['name'],
+        position: Offset(x, y),
+      ).copyWith(intersectionRadius: map['intersectionRadius'] as double);
+    }
+    throw Exception("Point.fromMap: Unknown type: $type");
   }
 }

@@ -5,6 +5,8 @@ import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/entities/text_block.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/widgets/floating_panel_widget.dart';
+import 'package:notes_on_image/utils/inputDialog.dart';
+import 'package:path/path.dart' as p;
 
 class DesignationsPanelWidget extends StatelessWidget {
   const DesignationsPanelWidget({super.key});
@@ -18,6 +20,37 @@ class DesignationsPanelWidget extends StatelessWidget {
           MediaQuery.of(context).size.height * 0.9,
         ),
         children: [
+          IconButton(
+              tooltip: "Open",
+              onPressed: () async {
+                final path = await Get.dialog<String>(
+                    InputDialog(title: "Open file path"));
+                if (path == null) return;
+                state.openPath(path);
+              },
+              icon: const Icon(Icons.folder_open)),
+          IconButton(
+              tooltip: "Save",
+              onPressed: () async {
+                final name = await Get.dialog<String>(InputDialog(
+                    title:
+                        "File name with extension (Will be saved in ${state.workDir})"));
+                if (name == null) return;
+                final path = p.join(state.workDir, name);
+                state.saveZip(outputFilePath: path);
+              },
+              icon: const Icon(Icons.save)),
+          IconButton(
+              tooltip: "Export",
+              onPressed: () async {
+                final name = await Get.dialog<String>(InputDialog(
+                    title:
+                        "File name with extension (Will be saved in ${state.workDir})"));
+                if (name == null) return;
+                final path = p.join(state.workDir, name);
+                state.saveImage(outputFilePath: path);
+              },
+              icon: const Icon(Icons.send_time_extension_outlined)),
           IconButton(
               tooltip: "Undo",
               onPressed: () {

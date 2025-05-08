@@ -14,11 +14,6 @@ class ActionButtonMenuWidget extends StatelessWidget {
     return SpeedDial(
       speedDialChildren: [
         SpeedDialChild(
-          child: const Icon(Icons.share),
-          label: "Share",
-          onPressed: () => state.shareImage(),
-        ),
-        SpeedDialChild(
           child: const Icon(Icons.undo),
           label: "Undo",
           onPressed: () => state.undo(),

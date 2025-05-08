@@ -16,17 +16,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = Get.put<DesignationOnImageState>(DesignationOnImageState());
-    if (Platform.isLinux) {
-      state.loadImage(File("/home/lavruh/tmp/dataonimage/PS Main Engine.jpg"));
-    } else if (Platform.isAndroid) {
-      state.loadImage(File("/storage/emulated/0/test.jpg"));
-    }
+    Get.put<DesignationOnImageState>(DesignationOnImageState());
+
     return GetMaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        title: 'Notes on image',
+        theme: ThemeData(primarySwatch: Colors.grey),
         home: const Screen1());
   }
 }
@@ -36,32 +30,37 @@ class Screen1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String initText = "/home/lavruh/tmp/dataonimage/PS Main Engine.jpg";
+    if (Platform.isAndroid) {
+      initText = "/storage/emulated/0/test.jpg";
+    }
+    final textController = TextEditingController(text: initText);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('data'),
-      ),
       body: Center(
-        child: IconButton(
-            onPressed: () {
-              Navigator.push(context,
-                  PageRouteBuilder(pageBuilder: (context, _, __) {
-                return const Screen2();
-              }));
-            },
-            icon: const Icon(Icons.screen_lock_landscape)),
-      ),
+          child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: TextField(
+          controller: textController,
+          decoration: InputDecoration(
+            labelText: "File path",
+            suffix: IconButton(
+                onPressed: () => openFile(context, textController.text),
+                icon: const Icon(Icons.screen_lock_landscape)),
+          ),
+        ),
+      )),
       extendBodyBehindAppBar: true,
     );
   }
-}
 
-class Screen2 extends StatelessWidget {
-  const Screen2({super.key});
+  openFile(BuildContext context, String path) {
+    final file = File(path);
+    if (!file.existsSync()) return;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: const NotesOnImageScreen(),
-    );
+    final state = Get.find<DesignationOnImageState>();
+    state.open(file);
+    Navigator.push(context, PageRouteBuilder(pageBuilder: (context, _, __) {
+      return const NotesOnImageScreen();
+    }));
   }
 }
