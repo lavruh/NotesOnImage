@@ -7,7 +7,7 @@ jobs:
     name: flutter release apk
     runs-on: ubuntu-latest
     env:
-      APP_NAME: Tagged_todo_organizer  # <--- Variable defined here
+      APP_NAME: notes_on_image
 
     steps:
       - uses: actions/checkout@v3
