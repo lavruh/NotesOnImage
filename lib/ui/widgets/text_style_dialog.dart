@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/get.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/domain/entities/text_block.dart';
+import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
+import 'package:notes_on_image/ui/widgets/confirm_dialog.dart';
 
 class TextStyleDialog extends StatefulWidget {
   const TextStyleDialog({super.key, required this.item});
@@ -80,7 +83,21 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                     ),
                   ),
                 ),
-                IconButton(onPressed: _confirm, icon: const Icon(Icons.check)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _delete,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.orange.shade200, // sets the background color
+                      ),
+                      child: const Text("DELETE"),
+                    ),
+                    IconButton(
+                        onPressed: _confirm, icon: const Icon(Icons.check)),
+                  ],
+                ),
               ],
             ),
           ),
@@ -105,5 +122,14 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
   void _confirm() {
     final result = item.copyWith(text: nameController.text);
     Navigator.of(context, rootNavigator: true).pop<Designation>(result);
+  }
+
+  void _delete() async {
+    final confirmation =
+        await Get.dialog<bool>(ConfirmDialog(title: "Delete item?"));
+    if (confirmation != null && confirmation) {
+      Get.find<DesignationOnImageState>().deleteDesignation(id: item.id);
+      Get.back();
+    }
   }
 }

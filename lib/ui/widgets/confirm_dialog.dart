@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-class SaveConfirmDialog extends StatelessWidget {
-  const SaveConfirmDialog({super.key});
+class ConfirmDialog extends StatelessWidget {
+  const ConfirmDialog({super.key, required this.title});
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: const Text('Do you like to save changes?'),
+      content: Text(title),
       actions: [
         ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),

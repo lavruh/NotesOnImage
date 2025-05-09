@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -8,8 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image_util;
 import 'package:get/get.dart';
-import 'package:notes_on_image/ui/widgets/save_confirm_dialog.dart';
+import 'package:notes_on_image/ui/widgets/confirm_dialog.dart';
 import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
+import 'package:notes_on_image/utils/converter.dart';
 import 'package:path/path.dart' as path;
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
@@ -76,20 +78,15 @@ class DesignationOnImageState extends GetxController {
   }
 
   saveZip({String? outputFilePath}) async {
-    final originalImage = await image?.toByteData();
+    final originalImage = image;
     if (originalImage == null) return;
-    final outputImage = image_util.Image.fromBytes(
-      width: image!.width,
-      height: image!.height,
-      bytes: originalImage.buffer,
-      order: image_util.ChannelOrder.rgba,
-    );
+    final imgBytes = await imageToUint8List(originalImage);
+
     final data = objects.values.map((field) => field.toMap()).toList();
     final designationsJsonString = jsonEncode(data);
-    final name = path.basenameWithoutExtension(originalName);
 
+    final name = path.basenameWithoutExtension(originalName);
     final zipFilePath = outputFilePath ?? path.join(workDir, "$name.zip");
-    final imgBytes = image_util.encodeJpg(outputImage);
 
     final archive = Archive()
       ..addFile(ArchiveFile("$name.jpg", imgBytes.length, imgBytes))
@@ -157,7 +154,7 @@ class DesignationOnImageState extends GetxController {
   }) async {
     if (isChanged()) {
       final haveToSave = await Get.dialog(
-        const SaveConfirmDialog(),
+        const ConfirmDialog(title: 'Do you like to save changes?'),
         transitionDuration: const Duration(milliseconds: 0),
       );
       if (haveToSave == true) {
@@ -328,5 +325,21 @@ class DesignationOnImageState extends GetxController {
     if (path.isEmpty) return;
     final file = File(path);
     open(file);
+  }
+
+  void deleteDesignation({required int id}) {
+    if (!objects.containsKey(id)) return;
+    objToEdit = null;
+    objUpdateCallback = null;
+    isNewObj = false;
+    objects.remove(id);
+    objectsSequence.remove(id);
+    update();
+  }
+
+  void setImage(Uint8List data) async {
+    image = await decodeImageFromList(data);
+    imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
+    update();
   }
 }
