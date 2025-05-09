@@ -25,6 +25,7 @@ class DesignationOnImageState extends GetxController {
   bool isPressed = false;
   Designation? objToEdit;
   Offset cursorPosition = Offset(0, 0);
+  final appFormatExtension = ".notes";
 
   Function(Offset)? objUpdateCallback;
 
@@ -86,7 +87,8 @@ class DesignationOnImageState extends GetxController {
     final designationsJsonString = jsonEncode(data);
 
     final name = path.basenameWithoutExtension(originalName);
-    final zipFilePath = outputFilePath ?? path.join(workDir, "$name.zip");
+    String zipFilePath = outputFilePath ?? path.join(workDir, "$name$appFormatExtension");
+    zipFilePath = zipFilePath.contains(".") ? zipFilePath : "$zipFilePath$appFormatExtension";
 
     final archive = Archive()
       ..addFile(ArchiveFile("$name.jpg", imgBytes.length, imgBytes))
@@ -102,7 +104,7 @@ class DesignationOnImageState extends GetxController {
     if (!file.existsSync()) return;
     final extension = path.extension(file.path);
 
-    if (extension != '.zip' && extension != '.jpg') return;
+    if (extension != appFormatExtension && extension != '.jpg') return;
     isBusy = true;
     update();
     objects.clear();
@@ -110,7 +112,7 @@ class DesignationOnImageState extends GetxController {
     workDir = path.dirname(file.path);
     originalName = path.basenameWithoutExtension(file.path);
 
-    if (extension == '.zip') await _openZip(file);
+    if (extension == appFormatExtension) await _openZip(file);
     if (extension == '.jpg') await _loadImage(file);
 
     isBusy = false;
@@ -132,7 +134,7 @@ class DesignationOnImageState extends GetxController {
       }
     }
     if (source == null || json == null) {
-      throw Exception("Wrong zip file format: \n source $source\n json $json");
+      throw Exception("Wrong file format: \n source $source\n json $json");
     }
 
     final data = source.content;
