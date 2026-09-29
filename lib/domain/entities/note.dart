@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/domain/entities/point.dart';
 import 'package:notes_on_image/domain/entities/point_arrow.dart';

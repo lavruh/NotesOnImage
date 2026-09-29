@@ -1,5 +1,5 @@
 import 'package:crop_image/crop_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:notes_on_image/utils/converter.dart';
 
 class CorpImageScreen extends StatefulWidget {

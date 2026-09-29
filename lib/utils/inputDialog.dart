@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class InputDialog extends StatelessWidget {
   const InputDialog({super.key, required this.title});

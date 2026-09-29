@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
@@ -8,8 +8,13 @@ import 'package:notes_on_image/domain/entities/dimension.dart';
 import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/entities/point_arrow.dart';
 import 'package:notes_on_image/domain/entities/text_block.dart';
+import 'package:notes_on_image/main.dart';
 
 main() {
+  testWidgets("MyApp renders TextField without localizations error", (tester) async {
+    await tester.pumpWidget(const MyApp());
+    expect(find.byType(TextField), findsOneWidget);
+  });
 
   test("create and read json string", () async {
     final note = Note.empty().copyWith(text: "Note 1", drawTextFrame: true);

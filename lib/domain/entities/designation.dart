@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:notes_on_image/domain/entities/dimension.dart';
 import 'package:notes_on_image/domain/entities/note.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 extension ColorToneExtension on Color {
   Color generateBackgroundColor({double amount = 0.4}) {
