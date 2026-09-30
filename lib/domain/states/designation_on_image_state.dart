@@ -8,7 +8,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:image/image.dart' as image_util;
-import 'package:get/get.dart';
 import 'package:notes_on_image/ui/widgets/confirm_dialog.dart';
 import 'package:notes_on_image/ui/widgets/text_style_dialog.dart';
 import 'package:notes_on_image/utils/converter.dart';
@@ -17,7 +16,27 @@ import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class DesignationOnImageState extends GetxController {
+class DesignationOnImageScope extends InheritedNotifier<DesignationOnImageState> {
+  const DesignationOnImageScope({
+    super.key,
+    required DesignationOnImageState notifier,
+    required super.child,
+  }) : super(notifier: notifier);
+
+  static DesignationOnImageState of(BuildContext context, {bool listen = true}) {
+    if (listen) {
+      final scope = context.dependOnInheritedWidgetOfExactType<DesignationOnImageScope>();
+      assert(scope != null, 'No DesignationOnImageScope found in context');
+      return scope!.notifier!;
+    } else {
+      final scope = context.findAncestorWidgetOfExactType<DesignationOnImageScope>();
+      assert(scope != null, 'No DesignationOnImageScope found in context');
+      return scope!.notifier!;
+    }
+  }
+}
+
+class DesignationOnImageState extends ChangeNotifier {
   Map<int, Designation> objects = {};
   List<int> objectsSequence = [];
   bool isNewObj = false;
@@ -33,6 +52,10 @@ class DesignationOnImageState extends GetxController {
   late Size imageSize;
   String workDir = "";
   String originalName = "";
+
+  void update() {
+    notifyListeners();
+  }
 
   bool isChanged() {
     if (objectsSequence.isNotEmpty) {
@@ -55,7 +78,7 @@ class DesignationOnImageState extends GetxController {
     if (image == null) throw Exception("Image is null");
     final rec = ui.PictureRecorder();
     final canvas = Canvas(rec);
-    final painter = ImagePainter();
+    final painter = ImagePainter(this);
     painter.paint(canvas, imageSize);
     final picture = rec.endRecording();
     final im = await picture.toImage(image!.width, image!.height);
@@ -149,15 +172,16 @@ class DesignationOnImageState extends GetxController {
     }
   }
 
-  hasToSaveDialog({
+  hasToSaveDialog(
+    BuildContext context, {
     required Function onConfirmCallback,
     Function? onCancelCallback,
     Function? onNoCallback,
   }) async {
     if (isChanged()) {
-      final haveToSave = await Get.dialog(
-        const ConfirmDialog(title: 'Do you like to save changes?'),
-        transitionDuration: const Duration(milliseconds: 0),
+      final haveToSave = await showDialog<bool>(
+        context: context,
+        builder: (context) => const ConfirmDialog(title: 'Do you like to save changes?'),
       );
       if (haveToSave == true) {
         onConfirmCallback();
@@ -185,17 +209,19 @@ class DesignationOnImageState extends GetxController {
     }
   }
 
-  initAddDesignation(Designation item) async {
-    final i = await Get.dialog<Designation>(TextStyleDialog(
-      item: item,
-    ));
+  initAddDesignation(BuildContext context, Designation item) async {
+    final i = await showDialog<Designation>(
+      context: context,
+      builder: (context) => TextStyleDialog(item: item),
+    );
     if (i != null) {
       isNewObj = true;
       objToEdit = i;
+      update();
     }
   }
 
-  panDown(Offset pos) {
+  panDown(BuildContext context, Offset pos) {
     isPressed = true;
     final item = objToEdit;
     if (isNewObj && item != null) {
@@ -205,8 +231,8 @@ class DesignationOnImageState extends GetxController {
         objToEdit?.updateOffsets(p2: val);
       });
     } else {
-      Timer(Duration(milliseconds: 500), () {
-        initUpdateDesignationAtPosition(pos);
+      Timer(const Duration(milliseconds: 500), () {
+        initUpdateDesignationAtPosition(context, pos);
       });
     }
     update();
@@ -228,10 +254,11 @@ class DesignationOnImageState extends GetxController {
     update();
   }
 
-  updateDesignationStyle(Designation item) async {
-    final updatedItem = await Get.dialog<Designation>(TextStyleDialog(
-      item: item,
-    ));
+  updateDesignationStyle(BuildContext context, Designation item) async {
+    final updatedItem = await showDialog<Designation>(
+      context: context,
+      builder: (context) => TextStyleDialog(item: item),
+    );
     if (updatedItem != null && objects.containsKey(updatedItem.id)) {
       objects[updatedItem.id] = updatedItem;
       objToEdit = null;
@@ -239,12 +266,12 @@ class DesignationOnImageState extends GetxController {
     update();
   }
 
-  initUpdateDesignationAtPosition(Offset position) {
+  initUpdateDesignationAtPosition(BuildContext context, Offset position) {
     final cp = cursorPosition;
     if (isSamePosition(position, cp)) {
       for (Designation o in objects.values) {
         final callback = o.getUpdateCallBackIfTouchedAndHighlightIt(
-            position, () => updateDesignationStyle(o));
+            position, () => updateDesignationStyle(context, o));
         if (callback != null) {
           update();
           objToEdit = o;
@@ -253,15 +280,6 @@ class DesignationOnImageState extends GetxController {
         }
       }
     }
-  }
-
-  @override
-  void onInit() async {
-    if (await isPermissionsGranted() == false) {
-      throw Exception("No permissions to open file");
-    }
-    objects.clear();
-    super.onInit();
   }
 
   Future<bool> isPermissionsGranted() async {

@@ -1,32 +1,43 @@
 import 'dart:io';
 
-// import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:get/get.dart';
-import 'package:flutter/material.dart' as flutter_material;
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
 import 'package:notes_on_image/ui/screens/draw_on_image_screen.dart';
 
 void main() {
-  // debugPrintGestureArenaDiagnostics = true;
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    Get.put<DesignationOnImageState>(DesignationOnImageState());
+  State<MyApp> createState() => _MyAppState();
+}
 
-    return GetMaterialApp(
+class _MyAppState extends State<MyApp> {
+  final DesignationOnImageState _state = DesignationOnImageState();
+
+  @override
+  void dispose() {
+    _state.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DesignationOnImageScope(
+      notifier: _state,
+      child: MaterialApp(
         title: 'Notes on image',
-        theme: flutter_material.ThemeData(primarySwatch: flutter_material.Colors.grey),
+        theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey)),
         localizationsDelegates: const [
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        home: const Screen1());
+        home: const Screen1(),
+      ),
+    );
   }
 }
 
@@ -58,11 +69,11 @@ class Screen1 extends StatelessWidget {
     );
   }
 
-  openFile(BuildContext context, String path) {
+  void openFile(BuildContext context, String path) {
     final file = File(path);
     if (!file.existsSync()) return;
 
-    final state = Get.find<DesignationOnImageState>();
+    final state = DesignationOnImageScope.of(context, listen: false);
     state.open(file);
     Navigator.push(context, PageRouteBuilder(pageBuilder: (context, _, __) {
       return const NotesOnImageScreen();

@@ -1,5 +1,4 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:get/get.dart';
 import 'package:notes_on_image/domain/entities/dimension.dart';
 import 'package:notes_on_image/domain/entities/note.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
@@ -10,7 +9,7 @@ class ActionButtonMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = Get.find<DesignationOnImageState>();
+    final state = DesignationOnImageScope.of(context, listen: false);
     return SpeedDial(
       speedDialChildren: [
         SpeedDialChild(
@@ -21,12 +20,12 @@ class ActionButtonMenuWidget extends StatelessWidget {
         SpeedDialChild(
           child: const Icon(Icons.text_rotation_angledown_rounded),
           label: "Note",
-          onPressed: () => state.initAddDesignation(Note.empty()),
+          onPressed: () => state.initAddDesignation(context, Note.empty()),
         ),
         SpeedDialChild(
           child: const Icon(Icons.open_in_full),
           label: "Dimension",
-          onPressed: () => state.initAddDesignation(Dimension.empty()),
+          onPressed: () => state.initAddDesignation(context, Dimension.empty()),
         ),
       ],
       child: const Icon(Icons.menu),

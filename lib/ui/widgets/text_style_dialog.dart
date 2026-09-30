@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:get/get.dart';
 import 'package:notes_on_image/domain/entities/designation.dart';
 import 'package:notes_on_image/domain/entities/text_block.dart';
 import 'package:notes_on_image/domain/states/designation_on_image_state.dart';
@@ -18,7 +17,7 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
   final nameController = TextEditingController();
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     item = widget.item;
     nameController.text = item.text;
@@ -48,7 +47,7 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ListTile(title: Text("Text:")),
+                const ListTile(title: Text("Text:")),
                 ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: isSmallScreen ? w * 0.5 : 400,
@@ -59,7 +58,7 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                   ),
                 ),
                 ListTile(
-                  title: Text(
+                  title: const Text(
                     "Line weight:",
                   ),
                   trailing: DropdownButton(
@@ -69,13 +68,13 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                   ),
                 ),
                 SwitchListTile(
-                    title: Text("Text frame:"),
+                    title: const Text("Text frame:"),
                     value: item.drawTextFrame,
                     onChanged: _setTextFrame),
-                ListTile(title: Text("Color")),
+                const ListTile(title: Text("Color")),
                 Flexible(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: 300, maxWidth: 200),
+                    constraints: const BoxConstraints(maxHeight: 300, maxWidth: 200),
                     child: MaterialPicker(
                       portraitOnly: true,
                       pickerColor: item.lineColor,
@@ -126,10 +125,12 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
 
   void _delete() async {
     final confirmation =
-        await Get.dialog<bool>(ConfirmDialog(title: "Delete item?"));
-    if (confirmation != null && confirmation) {
-      Get.find<DesignationOnImageState>().deleteDesignation(id: item.id);
-      Get.back();
+        await showDialog<bool>(
+            context: context,
+            builder: (context) => const ConfirmDialog(title: "Delete item?"));
+    if (confirmation != null && confirmation && mounted) {
+      DesignationOnImageScope.of(context, listen: false).deleteDesignation(id: item.id);
+      Navigator.of(context).pop();
     }
   }
 }
