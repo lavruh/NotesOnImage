@@ -1,12 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 
 class InputDialog extends StatelessWidget {
-  const InputDialog({super.key, required this.title});
+  const InputDialog({super.key, required this.title, this.initialValue});
   final String title;
+  final String? initialValue;
 
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
+    final controller = TextEditingController(text: initialValue ?? '');
     return AlertDialog(
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -18,7 +19,7 @@ class InputDialog extends StatelessWidget {
       actions: [
         IconButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            icon: Icon(Icons.check))
+            icon: const Icon(Icons.check))
       ],
     );
   }

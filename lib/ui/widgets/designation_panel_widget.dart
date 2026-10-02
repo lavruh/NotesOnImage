@@ -39,12 +39,14 @@ class DesignationsPanelWidget extends StatelessWidget {
             IconButton(
                 tooltip: "Save",
                 onPressed: () async {
+                  final defaultName = "${state.originalName}${state.appFormatExtension}";
                   final name = await showDialog<String>(
                       context: context,
                       builder: (context) => InputDialog(
                           title:
-                              "File name with extension (Will be saved in ${state.workDir})"));
-                  if (name == null) return;
+                              "File name with extension (Will be saved in ${state.workDir})",
+                          initialValue: defaultName));
+                  if (name == null || name.isEmpty) return;
                   final path = p.join(state.workDir, name);
                   state.saveZip(outputFilePath: path);
                 },
@@ -52,12 +54,15 @@ class DesignationsPanelWidget extends StatelessWidget {
             IconButton(
                 tooltip: "Export",
                 onPressed: () async {
+                  final defaultName =
+                      "${state.originalName}_${state.generateNamePrefix()}.jpg";
                   final name = await showDialog<String>(
                       context: context,
                       builder: (context) => InputDialog(
                           title:
-                              "File name with extension (Will be saved in ${state.workDir})"));
-                  if (name == null) return;
+                              "File name with extension (Will be saved in ${state.workDir})",
+                          initialValue: defaultName));
+                  if (name == null || name.isEmpty) return;
                   final path = p.join(state.workDir, name);
                   state.saveImage(outputFilePath: path);
                 },
