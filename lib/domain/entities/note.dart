@@ -16,20 +16,21 @@ class Note extends Designation {
     required super.text,
     super.lineStyle,
     super.drawTextFrame,
+    super.lineWeight,
   });
 
   Note.empty()
       : super(
           text: '',
-          start: PointArrow(name: "start", position: Offset(0, 0)),
-          end: PointEmpty(name: "end", position: Offset(0, 0)),
+          start: PointArrow(name: "start", position: const Offset(0, 0)),
+          end: PointEmpty(name: "end", position: const Offset(0, 0)),
         );
 
   @override
   draw(Canvas canvas) {
     double direction = getDirection(start, end);
     for (final poi in points.values) {
-      poi.draw(canvas, paint, direction, lineWeight);
+      poi.draw(canvas, paint, direction, paint.strokeWidth);
     }
     final tp = drawText();
     final textCenter = (direction >= 0) & (direction < pi)
@@ -63,7 +64,6 @@ class Note extends Designation {
   }) {
     Paint style = lineStyle ?? paint;
     style.color = color ?? style.color;
-    style.strokeWidth = lineWeight ?? style.strokeWidth;
     return Note(
       id: id ?? this.id,
       start: start ?? startPoint,
@@ -71,6 +71,7 @@ class Note extends Designation {
       text: text ?? this.text,
       lineStyle: style,
       drawTextFrame: drawTextFrame ?? this.drawTextFrame,
+      lineWeight: lineWeight ?? this.lineWeight,
     );
   }
 }

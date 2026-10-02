@@ -23,12 +23,22 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
     nameController.text = item.text;
   }
 
-  List<DropdownMenuItem<int>> availableSizes = List.generate(
-      10,
-      (index) => DropdownMenuItem(
-            value: (index + 1) * 2,
-            child: Text(((index + 1) * 2).toString()),
-          ));
+  List<DropdownMenuItem<double>> availableSizes = const [
+    DropdownMenuItem(value: 100.0, child: Text("100%")),
+    DropdownMenuItem(value: 75.0, child: Text("75%")),
+    DropdownMenuItem(value: 50.0, child: Text("50%")),
+    DropdownMenuItem(value: 25.0, child: Text("25%")),
+    DropdownMenuItem(value: 10.0, child: Text("10%")),
+    DropdownMenuItem(value: 5.0, child: Text("5%")),
+  ];
+
+  double get effectiveLineWeight {
+    const allowed = [100.0, 75.0, 50.0, 25.0, 10.0, 5.0];
+    if (allowed.contains(item.lineWeight)) {
+      return item.lineWeight;
+    }
+    return 50.0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +71,9 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
                   title: const Text(
                     "Line weight:",
                   ),
-                  trailing: DropdownButton(
+                  trailing: DropdownButton<double>(
                     items: availableSizes,
-                    value: item.lineWeight,
+                    value: effectiveLineWeight,
                     onChanged: _lineWeightChanged,
                   ),
                 ),
@@ -105,8 +115,8 @@ class _TextStyleDialogState extends State<TextStyleDialog> {
     );
   }
 
-  void _lineWeightChanged(num? value) => setState(() {
-        final d = value?.toDouble() ?? 7;
+  void _lineWeightChanged(double? value) => setState(() {
+        final d = value ?? 100.0;
         item = item.copyWith(lineWeight: d);
       });
 

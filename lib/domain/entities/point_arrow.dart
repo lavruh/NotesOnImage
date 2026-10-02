@@ -14,12 +14,13 @@ class PointArrow extends Point {
     required double scale,
   }) {
     final arrowAng = -25;
+    final ySpread = scale * 0.75 + 8.0;
     canvas.drawLine(
       position,
       rotatePoint(
           origin: position,
           point: Offset(position.dx - scale * 4 + arrowAng,
-              position.dy + scale * 0.1 - (arrowAng) / 3),
+              position.dy + ySpread),
           a: direction),
       paint,
     );
@@ -28,7 +29,7 @@ class PointArrow extends Point {
       rotatePoint(
           origin: position,
           point: Offset(position.dx - scale * 4 + arrowAng,
-              position.dy - scale * 0.1 + (arrowAng) / 3),
+              position.dy - ySpread),
           a: direction),
       paint,
     );

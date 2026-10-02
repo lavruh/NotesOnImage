@@ -102,10 +102,15 @@ class ImagePainter extends CustomPainter {
     if (img != null) {
       canvas.drawImage(img, const Offset(0, 0), Paint());
     }
+    final imgSize = _state.imageSize;
     for (Designation o in _state.objects.values) {
+      o.updateStrokeWidth(imgSize);
       o.draw(canvas);
     }
-    _state.objToEdit?.draw(canvas);
+    if (_state.objToEdit != null) {
+      _state.objToEdit!.updateStrokeWidth(imgSize);
+      _state.objToEdit!.draw(canvas);
+    }
     _state.imageSize = size;
   }
 

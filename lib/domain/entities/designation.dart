@@ -15,6 +15,7 @@ abstract class Designation {
   late Paint paint;
   Map<String, Point> points = {};
   final bool drawTextFrame;
+  double lineWeight; // Percentage: 100.0, 75.0, 50.0, 25.0
 
   Designation({
     int? id,
@@ -23,7 +24,9 @@ abstract class Designation {
     Point? start,
     Point? end,
     this.drawTextFrame = false,
-  }) : _id = id ?? DateTime.now().millisecondsSinceEpoch {
+    double? lineWeight,
+  })  : _id = id ?? DateTime.now().millisecondsSinceEpoch,
+        lineWeight = lineWeight ?? 100.0 {
     if (lineStyle != null) {
       paint = Paint()
         ..strokeWidth = lineStyle.strokeWidth
@@ -31,7 +34,7 @@ abstract class Designation {
     } else {
       paint = Paint()
         ..color = Colors.lightGreenAccent
-        ..strokeWidth = 8.0;
+        ..strokeWidth = 12.0;
     }
     points['textPosition'] =
         PointEmpty(name: 'textPosition', position: Offset(0, 0));
@@ -42,12 +45,21 @@ abstract class Designation {
   }
 
   int get id => _id;
-  double get lineWeight => paint.strokeWidth;
-  set lineWeight(double val) => paint.strokeWidth = val;
   Color get lineColor => paint.color;
   set lineColor(Color val) => paint.color = val;
 
-  double get textOffset => -50 - log(lineWeight) * 10 - lineWeight;
+  void updateStrokeWidth(Size? imageSize) {
+    if (imageSize != null && imageSize.width > 0 && imageSize.height > 0) {
+      final minDim = min(imageSize.width, imageSize.height);
+      final baseWidth = max(minDim * 0.04, 3.0);
+      final percentage = (lineWeight <= 0) ? 100.0 : lineWeight;
+      paint.strokeWidth = baseWidth * (percentage / 100.0);
+    } else {
+      paint.strokeWidth = max((lineWeight / 100.0) * 12.0, 1.5);
+    }
+  }
+
+  double get textOffset => -45.0 - paint.strokeWidth * 5.0;
 
   Point get startPoint => points['start']!;
   set startPoint(Point val) => points['start'] = val;
@@ -100,7 +112,7 @@ abstract class Designation {
       backgroundColor: bg,
       height: 1.5,
       leadingDistribution: TextLeadingDistribution.even,
-      fontSize: lineWeight * 2 + 30,
+      fontSize: paint.strokeWidth * 2 + 45,
     );
   }
 
@@ -153,7 +165,7 @@ abstract class Designation {
       'id': _id,
       'text': text,
       'color': paint.color.toHexString(),
-      'strokeWidth': paint.strokeWidth,
+      'strokeWidth': lineWeight,
       'points': points.values.map((poi) => poi.toMap()).toList(),
       'drawTextFrame': drawTextFrame,
     };
@@ -178,13 +190,24 @@ abstract class Designation {
     }
     final String c = map['color'];
 
+    final num? rawStroke = map['strokeWidth'];
+    double parsedWeight = 100.0;
+    if (rawStroke != null) {
+      final double val = rawStroke.toDouble();
+      if (val <= 20.0 && val > 0) {
+        parsedWeight = 100.0;
+      } else {
+        parsedWeight = val;
+      }
+    }
+
     if (type == "Note") {
       return Note.empty().copyWith(
         id: map['id'],
         text: map['text'],
         start: poi['start'],
         end: poi['end'],
-        lineWeight: map['strokeWidth'],
+        lineWeight: parsedWeight,
         color: c.toColor(),
         drawTextFrame: map['drawTextFrame'],
       );
@@ -195,7 +218,7 @@ abstract class Designation {
         text: map['text'],
         start: poi['start'],
         end: poi['end'],
-        lineWeight: map['strokeWidth'],
+        lineWeight: parsedWeight,
         color: c.toColor(),
         drawTextFrame: map['drawTextFrame'],
       );
@@ -206,7 +229,7 @@ abstract class Designation {
         text: map['text'],
         start: poi['start'],
         end: poi['end'],
-        lineWeight: map['strokeWidth'],
+        lineWeight: parsedWeight,
         color: c.toColor(),
         drawTextFrame: map['drawTextFrame'],
       );

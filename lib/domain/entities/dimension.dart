@@ -14,13 +14,14 @@ class Dimension extends Designation {
     required super.end,
     super.lineStyle,
     super.drawTextFrame,
+    super.lineWeight,
   });
 
   Dimension.empty()
       : super(
           text: '',
-          start: PointArrow(name: "start", position: Offset(0, 0)),
-          end: PointArrow(name: "end", position: Offset(0, 0)),
+          start: PointArrow(name: "start", position: const Offset(0, 0)),
+          end: PointArrow(name: "end", position: const Offset(0, 0)),
         );
 
   @override
@@ -31,7 +32,7 @@ class Dimension extends Designation {
     for (final poi in points.values) {
       double d = direction;
       if (poi.name == "end") d = direction + pi;
-      poi.draw(canvas, paint, d, lineWeight);
+      poi.draw(canvas, paint, d, paint.strokeWidth);
     }
     canvas.save();
     canvas.translate(start.dx, start.dy);
@@ -57,7 +58,6 @@ class Dimension extends Designation {
   }) {
     Paint style = lineStyle ?? paint;
     style.color = color ?? style.color;
-    style.strokeWidth = lineWeight ?? style.strokeWidth;
     return Dimension(
       id: id ?? this.id,
       text: text ?? this.text,
@@ -65,7 +65,7 @@ class Dimension extends Designation {
       end: end ?? endPoint,
       lineStyle: style,
       drawTextFrame: drawTextFrame ?? this.drawTextFrame,
-
+      lineWeight: lineWeight ?? this.lineWeight,
     );
   }
 }

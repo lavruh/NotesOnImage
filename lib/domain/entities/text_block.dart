@@ -13,13 +13,14 @@ class TextBlock extends Designation {
     required super.text,
     super.lineStyle,
     super.drawTextFrame,
+    super.lineWeight,
   });
 
   TextBlock.empty()
       : super(
           text: '',
-          start: PointEmpty(name: "start", position: Offset(0, 0)),
-          end: PointEmpty(name: "end", position: Offset(0, 0)),
+          start: PointEmpty(name: "start", position: const Offset(0, 0)),
+          end: PointEmpty(name: "end", position: const Offset(0, 0)),
           drawTextFrame: true,
         );
 
@@ -37,7 +38,6 @@ class TextBlock extends Designation {
   }) {
     Paint style = lineStyle ?? paint;
     style.color = color ?? style.color;
-    style.strokeWidth = lineWeight ?? style.strokeWidth;
     return TextBlock(
       id: id ?? this.id,
       start: start ?? startPoint,
@@ -45,19 +45,20 @@ class TextBlock extends Designation {
       text: text ?? this.text,
       lineStyle: style,
       drawTextFrame: drawTextFrame ?? this.drawTextFrame,
+      lineWeight: lineWeight ?? this.lineWeight,
     );
   }
 
   @override
   draw(Canvas canvas) {
-    textPosition = start + Offset(50, 50);
+    textPosition = start + const Offset(50, 50);
 
     final shadedColor = paint.color.generateBackgroundColor();
     final color = drawTextFrame ? shadedColor : paint.color;
     if (drawTextFrame) canvas.drawRect(Rect.fromPoints(start, end), paint);
 
     for (final poi in points.values) {
-      poi.draw(canvas, paint, 0, lineWeight);
+      poi.draw(canvas, paint, 0, paint.strokeWidth);
     }
 
     final style = ParagraphStyle(textAlign: TextAlign.start);
@@ -66,7 +67,7 @@ class TextBlock extends Designation {
       color: color,
       height: 1.5,
       leadingDistribution: TextLeadingDistribution.even,
-      fontSize: lineWeight * 2 + 30,
+      fontSize: paint.strokeWidth * 2 + 45,
     );
     pBuilder.pushStyle(textStyle);
     pBuilder.addText(text);

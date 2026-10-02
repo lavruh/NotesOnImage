@@ -42,6 +42,7 @@ class DesignationOnImageState extends ChangeNotifier {
   bool isNewObj = false;
   bool isBusy = false;
   bool isPressed = false;
+  bool isChanged = false;
   Designation? objToEdit;
   Offset cursorPosition = Offset(0, 0);
   final appFormatExtension = ".notes";
@@ -55,13 +56,6 @@ class DesignationOnImageState extends ChangeNotifier {
 
   void update() {
     notifyListeners();
-  }
-
-  bool isChanged() {
-    if (objectsSequence.isNotEmpty) {
-      return true;
-    }
-    return false;
   }
 
   _loadImage(File f) async {
@@ -97,6 +91,7 @@ class DesignationOnImageState extends ChangeNotifier {
     );
     await outFile.writeAsBytes(image_util.encodeJpg(outputImage));
     isBusy = false;
+    isChanged = false;
     update();
     return outFile;
   }
@@ -121,6 +116,8 @@ class DesignationOnImageState extends ChangeNotifier {
     final zipFile = File(zipFilePath);
     final buffer = ZipEncoder().encode(archive);
     await zipFile.writeAsBytes(buffer);
+    isChanged = false;
+    update();
   }
 
   void open(File file) async {
@@ -132,6 +129,7 @@ class DesignationOnImageState extends ChangeNotifier {
     update();
     objects.clear();
     objectsSequence.clear();
+    isChanged = false;
     workDir = path.dirname(file.path);
     originalName = path.basenameWithoutExtension(file.path);
 
@@ -139,6 +137,7 @@ class DesignationOnImageState extends ChangeNotifier {
     if (extension == '.jpg') await _loadImage(file);
 
     isBusy = false;
+    isChanged = false;
     update();
   }
 
@@ -178,17 +177,19 @@ class DesignationOnImageState extends ChangeNotifier {
     Function? onCancelCallback,
     Function? onNoCallback,
   }) async {
-    if (isChanged()) {
+    if (isChanged) {
       final haveToSave = await showDialog<bool>(
         context: context,
         builder: (context) => const ConfirmDialog(title: 'Do you like to save changes?'),
       );
       if (haveToSave == true) {
         onConfirmCallback();
+        isChanged = false;
         return;
       }
       if (haveToSave == false) {
         if (onNoCallback != null) onNoCallback();
+        isChanged = false;
         return;
       }
       if (onCancelCallback != null) onCancelCallback();
@@ -205,6 +206,7 @@ class DesignationOnImageState extends ChangeNotifier {
     if (objectsSequence.isNotEmpty) {
       final id = objectsSequence.removeLast();
       objects.remove(id);
+      isChanged = true;
       update();
     }
   }
@@ -244,6 +246,7 @@ class DesignationOnImageState extends ChangeNotifier {
     objects[id] = obj;
     objectsSequence.removeWhere((objId) => objId == id);
     objectsSequence.add(id);
+    isChanged = true;
     update();
   }
 
@@ -262,6 +265,7 @@ class DesignationOnImageState extends ChangeNotifier {
     if (updatedItem != null && objects.containsKey(updatedItem.id)) {
       objects[updatedItem.id] = updatedItem;
       objToEdit = null;
+      isChanged = true;
     }
     update();
   }
@@ -354,12 +358,14 @@ class DesignationOnImageState extends ChangeNotifier {
     isNewObj = false;
     objects.remove(id);
     objectsSequence.remove(id);
+    isChanged = true;
     update();
   }
 
   void setImage(Uint8List data) async {
     image = await decodeImageFromList(data);
     imageSize = Size(image!.width.toDouble(), image!.height.toDouble());
+    isChanged = true;
     update();
   }
 }
